@@ -1,16 +1,12 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('Products', {
+  return sequelize.define('Product_Repository', {
     ProductIDOra: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
     Title: {
-      type: DataTypes.STRING(150),
-      allowNull: true
-    },
-    Subtitle: {
       type: DataTypes.STRING(100),
       allowNull: true
     },
@@ -26,24 +22,32 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.FLOAT,
       allowNull: true
     },
-    Big_Image_Id: {
-      type: DataTypes.INTEGER,
+    Category_L1_ID: {
+      type: DataTypes.TINYINT,
       allowNull: true
     },
-    Small_Image_Id: {
-      type: DataTypes.INTEGER,
+    Category_L1_Name: {
+      type: DataTypes.STRING(50),
       allowNull: true
-    },
-    CategoryID: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'Category',
-        key: 'CategoryID'
-      }
     },
     Display: {
       type: DataTypes.BOOLEAN,
+      allowNull: true
+    },
+    PackageIDOra: {
+      type: DataTypes.TINYINT,
+      allowNull: true
+    },
+    PackageName: {
+      type: DataTypes.STRING(50),
+      allowNull: true
+    },
+    PackageQuantity: {
+      type: DataTypes.TINYINT,
+      allowNull: true
+    },
+    PackageWeight: {
+      type: DataTypes.FLOAT,
       allowNull: true
     },
     LastUpdate: {
@@ -53,12 +57,12 @@ module.exports = function(sequelize, DataTypes) {
     }
   }, {
     sequelize,
-    tableName: 'Products',
+    tableName: 'Product_Repository',
     schema: 'dbo',
     timestamps: false,
     indexes: [
       {
-        name: "PK_Products",
+        name: "PK_Product_Repository",
         unique: true,
         fields: [
           { name: "ProductIDOra" },

@@ -3,6 +3,10 @@ const config = require('config')
 const { Sequelize, Op, Model, DataTypes } = require("sequelize")
 
 
+// Override timezone formatting for MSSQL
+Sequelize.DATE.prototype._stringify = function _stringify(date, options) {
+  return this._applyTimezone(date, options).format('YYYY-MM-DD HH:mm:ss.SSS');
+};
 
 
 const DBconfig = {

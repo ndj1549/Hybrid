@@ -7,7 +7,9 @@ var _OrderStatus = require("./OrderStatus");
 var _Orders = require("./Orders");
 var _Ostan = require("./Ostan");
 var _Packages = require("./Packages");
+var _ProductImage = require("./ProductImage");
 var _Product_Package = require("./Product_Package");
+var _Product_Repository = require("./Product_Repository");
 var _Products = require("./Products");
 var _Routes = require("./Routes");
 var _UserRoute = require("./UserRoute");
@@ -23,7 +25,9 @@ function initModels(sequelize) {
   var Orders = _Orders(sequelize, DataTypes);
   var Ostan = _Ostan(sequelize, DataTypes);
   var Packages = _Packages(sequelize, DataTypes);
+  var ProductImage = _ProductImage(sequelize, DataTypes);
   var Product_Package = _Product_Package(sequelize, DataTypes);
+  var Product_Repository = _Product_Repository(sequelize, DataTypes);
   var Products = _Products(sequelize, DataTypes);
   var Routes = _Routes(sequelize, DataTypes);
   var UserRoute = _UserRoute(sequelize, DataTypes);
@@ -34,16 +38,16 @@ function initModels(sequelize) {
   Packages.belongsToMany(Products, { through: Product_Package, foreignKey: "PackageID", otherKey: "ProductIDOra" });
   Users.belongsToMany(Routes, { through: UserRoute, foreignKey: "UserID", otherKey: "RouteID" });
   Routes.belongsToMany(Users, { through: UserRoute, foreignKey: "RouteID", otherKey: "UserID" });
-  City.belongsTo(Ostan, { foreignKey: "OstanID"});
-  Ostan.hasMany(City, { foreignKey: "OstanID"});
+  City.belongsTo(Ostan, { foreignKey: "OstanID_Ora"});
+  Ostan.hasMany(City, { foreignKey: "OstanID_Ora"});
   Customers.belongsTo(City, { foreignKey: "CityID"});
   City.hasMany(Customers, { foreignKey: "CityID"});
-  Customers.belongsTo(Routes, { foreignKey: "RouteID"});
-  Routes.hasMany(Customers, { foreignKey: "RouteID"});
   OrderDetails.belongsTo(Orders, { foreignKey: "OrderID"});
   Orders.hasMany(OrderDetails, { foreignKey: "OrderID"});
   Orders.belongsTo(OrderStatus, { foreignKey: "OrderStatusID"});
   OrderStatus.hasMany(Orders, { foreignKey: "OrderStatusID"});
+  ProductImage.belongsTo(Product_Repository, { foreignKey: "ProductIDOraFK"});
+  Product_Repository.hasMany(ProductImage, { foreignKey: "ProductIDOraFK"});
   Product_Package.belongsTo(Packages, { foreignKey: "PackageID"});
   Packages.hasMany(Product_Package, { foreignKey: "PackageID"});
   Product_Package.belongsTo(Products, { foreignKey: "ProductIDOra"});
@@ -64,7 +68,9 @@ function initModels(sequelize) {
     Orders,
     Ostan,
     Packages,
+    ProductImage,
     Product_Package,
+    Product_Repository,
     Products,
     Routes,
     UserRoute,

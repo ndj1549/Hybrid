@@ -1,13 +1,12 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('City', {
-    CityID: {
-      autoIncrement: true,
-      type: DataTypes.SMALLINT,
+    CityID_Ora: {
+      type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    OstanID: {
+    OstanID_Ora: {
       type: DataTypes.TINYINT,
       allowNull: false,
       references: {
@@ -16,14 +15,6 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
     CityName: {
-      type: DataTypes.STRING(50),
-      allowNull: true
-    },
-    CityLat: {
-      type: DataTypes.STRING(50),
-      allowNull: true
-    },
-    CityLong: {
       type: DataTypes.STRING(50),
       allowNull: true
     }
@@ -37,7 +28,7 @@ module.exports = function(sequelize, DataTypes) {
         name: "PK_City",
         unique: true,
         fields: [
-          { name: "CityID" },
+          { name: "CityID_Ora" },
         ]
       },
     ]

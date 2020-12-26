@@ -7,7 +7,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       primaryKey: true
     },
-    CustomerID: {
+    CustomerID_TFOra: {
       type: DataTypes.BIGINT,
       allowNull: true
     },
@@ -17,22 +17,19 @@ module.exports = function(sequelize, DataTypes) {
     },
     OrderDate: {
       type: DataTypes.DATE,
-      allowNull: true
+      allowNull: true,
+      defaultValue: Sequelize.fn('getdate')
     },
     ShippedDate: {
       type: DataTypes.DATE,
       allowNull: true
     },
     ShipCity: {
-      type: DataTypes.SMALLINT,
+      type: DataTypes.INTEGER,
       allowNull: true
     },
     ShipAddress: {
       type: DataTypes.STRING(100),
-      allowNull: true
-    },
-    Tonage: {
-      type: DataTypes.FLOAT,
       allowNull: true
     },
     OrderStatusID: {
@@ -42,6 +39,11 @@ module.exports = function(sequelize, DataTypes) {
         model: 'OrderStatus',
         key: 'StatusID'
       }
+    },
+    OracleRead: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
     }
   }, {
     sequelize,

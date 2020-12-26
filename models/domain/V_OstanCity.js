@@ -1,6 +1,18 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('V_OstanCity', {
+    CityID_Ora: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    OstanID_Ora: {
+      type: DataTypes.TINYINT,
+      allowNull: false
+    },
+    CityName: {
+      type: DataTypes.STRING(50),
+      allowNull: true
+    },
     OstanName: {
       type: DataTypes.STRING(50),
       allowNull: true
@@ -10,26 +22,6 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     Longitude: {
-      type: DataTypes.STRING(50),
-      allowNull: true
-    },
-    CityID: {
-      type: DataTypes.SMALLINT,
-      allowNull: false
-    },
-    OstanID: {
-      type: DataTypes.TINYINT,
-      allowNull: false
-    },
-    CityName: {
-      type: DataTypes.STRING(50),
-      allowNull: true
-    },
-    CityLat: {
-      type: DataTypes.STRING(50),
-      allowNull: true
-    },
-    CityLong: {
       type: DataTypes.STRING(50),
       allowNull: true
     }

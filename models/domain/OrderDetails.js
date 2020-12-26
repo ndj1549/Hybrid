@@ -20,11 +20,23 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     Quantity: {
-      type: DataTypes.SMALLINT,
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    QuantityConfirmed: {
+      type: DataTypes.INTEGER,
       allowNull: true
     },
     Discount: {
       type: DataTypes.REAL,
+      allowNull: true
+    },
+    Tonage: {
+      type: DataTypes.FLOAT,
+      allowNull: true
+    },
+    PackgID: {
+      type: DataTypes.SMALLINT,
       allowNull: true
     }
   }, {

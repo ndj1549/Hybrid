@@ -7,7 +7,7 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true
     },
     CategoryName: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(250),
       allowNull: false
     },
     Display: {

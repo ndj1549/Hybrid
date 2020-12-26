@@ -2,7 +2,6 @@ const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('Ostan', {
     OstanID: {
-      autoIncrement: true,
       type: DataTypes.TINYINT,
       allowNull: false,
       primaryKey: true

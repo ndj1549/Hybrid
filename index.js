@@ -37,6 +37,26 @@ app.get('/', (req, res) => {
 });
 
 
+
+app.post('/bulk', (req, res) => {
+    console.log(req.body)
+    // throw new Error('woops');
+
+    //---------  Models
+    var User = require('./models/domain/Users')(sequelize, DataTypes)
+
+    User.bulkCreate(req.body).then(() => { // Notice: There are no arguments here, as of right now you'll have to...
+        //return User.findAll();
+        res.status(200).send('OK');
+    }).catch(err => {
+        //console.log(users) // ... in order to get the array of user objects
+        res.status(500).send('NOK');
+    })
+
+    //res.status(200).send('OK');
+});
+
+
 // const connSQL = config.get("connStr.sql");
 // console.log(connSQL)
 // const sequelize = new Sequelize(connSQL.database, connSQL.user, connSQL.pass, {

@@ -1,11 +1,14 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('Customers', {
-    CustomerID: {
-      autoIncrement: true,
+    CustomerID_TFOra: {
       type: DataTypes.BIGINT,
       allowNull: false,
       primaryKey: true
+    },
+    CustomerID: {
+      type: DataTypes.BIGINT,
+      allowNull: true
     },
     CustomerName: {
       type: DataTypes.STRING(50),
@@ -16,11 +19,11 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     CityID: {
-      type: DataTypes.SMALLINT,
+      type: DataTypes.INTEGER,
       allowNull: true,
       references: {
         model: 'City',
-        key: 'CityID'
+        key: 'CityID_Ora'
       }
     },
     PanelTitle: {
@@ -29,11 +32,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     RouteID: {
       type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'Routes',
-        key: 'RouteID'
-      }
+      allowNull: true
     },
     Latitude: {
       type: DataTypes.STRING(50),
@@ -41,6 +40,10 @@ module.exports = function(sequelize, DataTypes) {
     },
     Longitude: {
       type: DataTypes.STRING(50),
+      allowNull: true
+    },
+    MandeEtebar: {
+      type: DataTypes.DECIMAL(19,4),
       allowNull: true
     }
   }, {
@@ -50,10 +53,10 @@ module.exports = function(sequelize, DataTypes) {
     timestamps: false,
     indexes: [
       {
-        name: "PK_Customers",
+        name: "PK_Customers_1",
         unique: true,
         fields: [
-          { name: "CustomerID" },
+          { name: "CustomerID_TFOra" },
         ]
       },
     ]

@@ -1,31 +1,39 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('Routes', {
-    RouteID: {
+  return sequelize.define('ProductImage', {
+    ImageID: {
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    CityID: {
+    ProductIDOraFK: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true,
+      references: {
+        model: 'Product_Repository',
+        key: 'ProductIDOra'
+      }
     },
-    RouteName: {
-      type: DataTypes.STRING(50),
+    ImgPath: {
+      type: DataTypes.STRING(100),
+      allowNull: true
+    },
+    ThumbPath: {
+      type: DataTypes.STRING(100),
       allowNull: true
     }
   }, {
     sequelize,
-    tableName: 'Routes',
+    tableName: 'ProductImage',
     schema: 'dbo',
     timestamps: false,
     indexes: [
       {
-        name: "PK_Routes",
+        name: "PK_ProductImage",
         unique: true,
         fields: [
-          { name: "RouteID" },
+          { name: "ImageID" },
         ]
       },
     ]
