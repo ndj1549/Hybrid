@@ -10,6 +10,14 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.BIGINT,
       allowNull: true
     },
+    CenterID: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'Centers',
+        key: 'CenterID_Ora'
+      }
+    },
     CustomerName: {
       type: DataTypes.STRING(50),
       allowNull: true
@@ -28,10 +36,6 @@ module.exports = function(sequelize, DataTypes) {
     },
     PanelTitle: {
       type: DataTypes.STRING(50),
-      allowNull: true
-    },
-    RouteID: {
-      type: DataTypes.INTEGER,
       allowNull: true
     },
     Latitude: {

@@ -25,7 +25,8 @@ module.exports = function(sequelize, DataTypes) {
     },
     QuantityConfirmed: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      defaultValue: 0
     },
     Discount: {
       type: DataTypes.REAL,

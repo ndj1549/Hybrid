@@ -58,7 +58,7 @@ const List_Products_By_Category = async (req, res, next) => {
 const List_Products_By_Category_Paginated = async (req, res, next) => {
   try {
     const Count_Per_page = 10;
-    let page = req.params.page  && req.params.page == 0 ? 1 : req.params.page;
+    let page = req.params.page && req.params.page == 0 ? 1 : req.params.page;
     console.log('page = ' + page)
 
     if (!page) {
@@ -67,12 +67,12 @@ const List_Products_By_Category_Paginated = async (req, res, next) => {
       var productRepo = require('../../../models/domain/Product_Repository')(sequelize, DataTypes)
 
       await productRepo.findAndCountAll({
-        where: { 
+        where: {
           Category_L1_ID: req.params.catID
         },
         order: [],
         limit: Count_Per_page,
-        offset: Count_Per_page*(page-1),
+        offset: Count_Per_page * (page - 1),
       }).then(function (result) {
         res.status(200).send(result);
       });
@@ -84,6 +84,8 @@ const List_Products_By_Category_Paginated = async (req, res, next) => {
 }
 
 const Bulk_Insert_Products = async (req, res, next) => {
+  // Note:
+  // This is how to disable Foreign keys and enable them again after your desired operation
   // sequelize.transaction(function(t) {
   //   var options = { raw: true, transaction: t }
 
@@ -101,6 +103,27 @@ const Bulk_Insert_Products = async (req, res, next) => {
   // }).success(function() {
   //   // go on here ...
   // })
+
+  let tran1;
+
+  try {
+    tran1 = await sequelize.transaction();
+    var productModel = require('../../../models/domain/Product_Repository')(sequelize, DataTypes)
+
+
+    await productModel.destroy({ where: {} }, { transaction: tran1 });
+    await productModel.bulkCreate(req.body, { transaction: tran1 });
+
+    // commit
+    await tran1.commit();
+    res.status(200).send('OK');
+
+
+
+  } catch (err) {
+    await tran1.rollback();// Is this the right place?
+    res.status(500).send(err)
+  }
 }
 
 const Increment_Product_Mojudi = async (req, res, next) => {
@@ -151,5 +174,6 @@ module.exports = {
   List_Products_By_Category,
   List_Products_By_Category_Paginated,
   Simple_Select_EagerLoad,
-  List_OstanCity
+  List_OstanCity,
+  Bulk_Insert_Products
 }

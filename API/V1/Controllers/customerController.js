@@ -133,6 +133,7 @@ const Bulk_Update_Customers = async (req, res, next) => {
         customerModel.bulkCreate(req.body,
             {
                 updateOnDuplicate: [
+                    "CustomerID_TFOra",
                     "CustomerID",
                     "CutomerFamily",
                     "MandeEtebar"
@@ -149,12 +150,20 @@ const Bulk_Update_Customers = async (req, res, next) => {
 }
 
 
+const List_Customers_By_CenterIDtfOra = async (req, res, next) => {
+    try{
+                
+    } catch(err) {
+        res.status(500).send(err)
+    }
+}
 
 
 module.exports = {
     List_Cutomers,
     Get_Customer_By_ID,
     List_Customers_By_CityID,
+    List_Customers_By_CenterIDtfOra,
     Update_Customer_Attributes,
     Insert_New_Customer,
     Bulk_Insert_Customers,

@@ -15,6 +15,14 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(50),
       allowNull: true
     },
+    CenterID: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'Centers',
+        key: 'CenterID_Ora'
+      }
+    },
     DOB: {
       type: DataTypes.DATE,
       allowNull: true

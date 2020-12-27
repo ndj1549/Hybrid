@@ -1,31 +1,26 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('Routes', {
-    RouteID: {
-      autoIncrement: true,
+  return sequelize.define('Centers', {
+    CenterID_Ora: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    CityID: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    RouteName: {
+    CenterName: {
       type: DataTypes.STRING(50),
       allowNull: true
     }
   }, {
     sequelize,
-    tableName: 'Routes',
+    tableName: 'Centers',
     schema: 'dbo',
     timestamps: false,
     indexes: [
       {
-        name: "PK_Routes",
+        name: "PK_Centers",
         unique: true,
         fields: [
-          { name: "RouteID" },
+          { name: "CenterID_Ora" },
         ]
       },
     ]

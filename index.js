@@ -33,6 +33,7 @@ app.use('/api', require('./API'));
 
 app.get('/', (req, res) => {
     // throw new Error('woops');
+    console.log('called / : at '+ new Date().toString())
     res.status(200).send('OK');
 });
 

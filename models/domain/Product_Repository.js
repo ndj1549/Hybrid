@@ -14,6 +14,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.INTEGER,
       allowNull: true
     },
+    Max_Order_Capacity: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     Price: {
       type: DataTypes.DECIMAL(19,4),
       allowNull: true

@@ -22,8 +22,9 @@ router.get('/products/cat', ProductController.List_Category_Of_Products)
 router.get('/products', ProductController.List_Products)
 router.get('/products/cat/:catID', ProductController.List_Products_By_Category)
 router.get('/products/cat/:catID/page-:page', ProductController.List_Products_By_Category_Paginated)
-router.get('/products/eager', ProductController.Simple_Select_EagerLoad)
+//router.get('/products/eager', ProductController.Simple_Select_EagerLoad)
 router.get('/products/city', ProductController.List_OstanCity)
+router.post('/products/bulk', ProductController.Bulk_Insert_Products)
 
 
 
@@ -50,6 +51,8 @@ router.param('orderID', /^[0-9]+$/) // forcing the orderID parameter to be int
 router.get('/orders/:orderID', OrderController.Get_Order_By_ID)
 router.get('/orders/today', OrderController.List_Orders_Of_Today)
 router.get('/orders/from/:FROM/to/:TO', OrderController.List_Orders_From_To)
+router.get('/orders/oraread/:oraRead', OrderController.List_Orders_ByTIG_OraRead)
+router.put('/orders/:orderID/set/oraread/:bit', OrderController.Set_OracleRead_Flag)
 
 
 
