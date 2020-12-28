@@ -24,16 +24,12 @@ function initModels(sequelize) {
 
   City.belongsTo(Ostan, { foreignKey: "OstanID_Ora"});
   Ostan.hasMany(City, { foreignKey: "OstanID_Ora"});
-  Customers.belongsTo(Centers, { foreignKey: "CenterID"});
-  Centers.hasMany(Customers, { foreignKey: "CenterID"});
   Customers.belongsTo(City, { foreignKey: "CityID"});
   City.hasMany(Customers, { foreignKey: "CityID"});
   OrderDetails.belongsTo(Orders, { foreignKey: "OrderID"});
   Orders.hasMany(OrderDetails, { foreignKey: "OrderID"});
   Orders.belongsTo(OrderStatus, { foreignKey: "OrderStatusID"});
   OrderStatus.hasMany(Orders, { foreignKey: "OrderStatusID"});
-  Users.belongsTo(Centers, { foreignKey: "CenterID"});
-  Centers.hasMany(Users, { foreignKey: "CenterID"});
 
   return {
     Centers,

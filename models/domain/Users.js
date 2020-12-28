@@ -17,11 +17,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     CenterID: {
       type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'Centers',
-        key: 'CenterID_Ora'
-      }
+      allowNull: true
     },
     DOB: {
       type: DataTypes.DATE,

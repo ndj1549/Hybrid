@@ -1,60 +1,72 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('Product_Repository', {
-    ProductIDOra: {
+    PRODUCTIDORA: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    Title: {
+    CENTERID: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true
+    },
+    TITLE: {
       type: DataTypes.STRING(100),
       allowNull: true
     },
-    Mojudi: {
+    MOJUDI: {
       type: DataTypes.INTEGER,
       allowNull: true
     },
-    Max_Order_Capacity: {
-      type: DataTypes.INTEGER,
+    VAHED: {
+      type: DataTypes.STRING(50),
       allowNull: true
     },
-    Price: {
+    MAX_ORDER_CAPACITY: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 1000
+    },
+    PRICE: {
       type: DataTypes.DECIMAL(19,4),
       allowNull: true
     },
-    Discount: {
+    DISCOUNT: {
       type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0
+    },
+    CATEGORY_L1_ID: {
+      type: DataTypes.INTEGER,
       allowNull: true
     },
-    Category_L1_ID: {
-      type: DataTypes.TINYINT,
-      allowNull: true
-    },
-    Category_L1_Name: {
+    CATEGORY_L1_NAME: {
       type: DataTypes.STRING(50),
       allowNull: true
     },
-    Display: {
+    DISPLAY: {
       type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: true
+    },
+    PACKAGEIDORA: {
+      type: DataTypes.INTEGER,
       allowNull: true
     },
-    PackageIDOra: {
-      type: DataTypes.TINYINT,
-      allowNull: true
-    },
-    PackageName: {
+    PACKAGENAME: {
       type: DataTypes.STRING(50),
       allowNull: true
     },
-    PackageQuantity: {
-      type: DataTypes.TINYINT,
+    PACKAGEQUANTITY: {
+      type: DataTypes.SMALLINT,
       allowNull: true
     },
-    PackageWeight: {
+    PACKAGEWEIGHT: {
       type: DataTypes.FLOAT,
       allowNull: true
     },
-    LastUpdate: {
+    LASTUPDATE: {
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: Sequelize.fn('getdate')
@@ -69,7 +81,8 @@ module.exports = function(sequelize, DataTypes) {
         name: "PK_Product_Repository",
         unique: true,
         fields: [
-          { name: "ProductIDOra" },
+          { name: "PRODUCTIDORA" },
+          { name: "CENTERID" },
         ]
       },
     ]
