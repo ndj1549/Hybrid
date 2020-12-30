@@ -12,6 +12,7 @@ const ProductController = require('./Controllers/productController')
 const CityController = require('./Controllers/cityController')
 const OrderController = require('./Controllers/orderController')
 const customerController = require('./Controllers/customerController')
+const centerController = require('./Controllers/centerController')
 
 
 
@@ -23,18 +24,20 @@ router.get('/products', ProductController.List_Products)
 router.get('/products/cat/:catID', ProductController.List_Products_By_Category)
 router.get('/products/cat/:catID/page-:page', ProductController.List_Products_By_Category_Paginated)
 //router.get('/products/eager', ProductController.Simple_Select_EagerLoad)
-router.get('/products/city', ProductController.List_OstanCity)
 router.post('/products/bulk', ProductController.Bulk_Insert_Products)
 
 
 
 //router.get('/customers', customerController.List_Cutomers)
 router.get('/customers/:customerID', customerController.Get_Customer_By_ID)
-router.put('/customers/:customerID', customerController.Update_Customer_Attributes)
+router.param('customerID_TFOra', /^[0-9]+$/) // forcing the orderID parameter to be int
+router.put('/customers/:customerID_TFOra', customerController.Update_Customer_Attributes)
 router.put('/customers/bulk', customerController.Bulk_Update_Customers)
 router.get('/customers/city/:cityID', customerController.List_Customers_By_CityID)
+router.get('/customers/center/:centerID', )
 router.post('/customers', customerController.Insert_New_Customer)
 router.post('/customers/bulk', customerController.Bulk_Insert_Customers)
+
 
 
 
@@ -53,8 +56,15 @@ router.get('/orders/today', OrderController.List_Orders_Of_Today)
 router.get('/orders/from/:FROM/to/:TO', OrderController.List_Orders_From_To)
 router.get('/orders/oraread/:oraRead', OrderController.List_Orders_ByTIG_OraRead)
 router.put('/orders/:orderID/set/oraread/:bit', OrderController.Set_OracleRead_Flag)
+router.put('/orders/:orderID/setStatus/:statusID', OrderController.Change_Order_Status)
 
 
+
+router.get('/centers', centerController.List_All_Centers)
+router.get('/centers/:centerID', centerController.Get_Center_By_ID)
+router.post('/centers', centerController.Insert_New_Center)
+router.put('/centers/:centerID', centerController.Edit_Center)
+router.post('/centers/bulk', centerController.Bulk_Insert_Centers)
 
 
 

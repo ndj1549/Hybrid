@@ -27,12 +27,11 @@ var schedule = require('node-schedule')
 const SYNC_SQL_WITH_ORA_Products = require('./scheduler')
 
 schedule.scheduleJob('* * * * * *', function () {    
-    
-    var n = new Date().toLocaleTimeString();
-    console.log(n)
+        
+    console.log(new Date().toLocaleTimeString())
 });
 
-schedule.scheduleJob('20 59 10 * * *', function () {
+schedule.scheduleJob('20 03 11 * * *', function () {
     // axios.get('http://localhost:5000/')
     //     .then(function (response) {
     //         // handle success

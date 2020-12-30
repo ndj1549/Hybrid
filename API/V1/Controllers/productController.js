@@ -134,35 +134,22 @@ const Update_Product_Attributes = async (req, res, next) => {
 
 }
 
-const Simple_Select_EagerLoad = async (req, res, next) => {
-  try {
-    const productRepo = require('../../../models/domain/Product_Repository')(sequelize, DataTypes)
-    const ProductImage = require('../../../models/domain/ProductImage')(sequelize, DataTypes)
+// const Simple_Select_EagerLoad = async (req, res, next) => {
+//   try {
+//     const productRepo = require('../../../models/domain/Product_Repository')(sequelize, DataTypes)
+//     const ProductImage = require('../../../models/domain/ProductImage')(sequelize, DataTypes)
 
-    const allProducts = await productRepo.findAll({
-      include: {
-        model: ProductImage,
-      }
-    });
-    res.status(200).send(allProducts)
-  } catch (err) {
-    res.status(500).send(err)
-  }
-}
+//     const allProducts = await productRepo.findAll({
+//       include: {
+//         model: ProductImage,
+//       }
+//     });
+//     res.status(200).send(allProducts)
+//   } catch (err) {
+//     res.status(500).send(err)
+//   }
+// }
 
-
-
-const List_OstanCity = async (req, res, next) => {
-  try {
-
-    const { City, Ostan } = require('../../../models/domain/init-models')(sequelize, DataTypes)
-    const mmm = await City.findAll({ include: Ostan })
-
-    res.status(200).send(mmm)
-  } catch (err) {
-    res.status(500).send(err)
-  }
-}
 
 
 
@@ -173,7 +160,6 @@ module.exports = {
   List_Products,
   List_Products_By_Category,
   List_Products_By_Category_Paginated,
-  Simple_Select_EagerLoad,
-  List_OstanCity,
+  //Simple_Select_EagerLoad,
   Bulk_Insert_Products
 }

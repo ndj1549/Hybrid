@@ -78,30 +78,32 @@ const Update_Customer_Attributes = async (req, res, next) => {
     try {
         var customerModel = require('../../../models/domain/Customers')(sequelize, DataTypes)
 
-        const result = await customerModel.findOne({
-            where: {
-                [Op.or]: [
-                    { CustomerID_TFOra: req.params.customerID },
-                    { CustomerID: req.params.customerID }
-                ]
-            }
-        });
+        // const result = await customerModel.findOne({
+        //     where: {
+        //         [Op.or]: [
+        //             { CustomerID_TFOra: req.params.customerID },
+        //             { CustomerID: req.params.customerID }
+        //         ]
+        //     }
+        // });
 
-        if (!result) {
-            res.status(404).send()
-        }
+
 
         // if(! Validate(req.body)) {
         //     res.status(400).send()
         // }
 
-        var userInput = req.params.body
-        result = { ...result, ...userInput }
-        await result.save()
+        //let userInput = _.pick(req.body, ['', ''])
 
+        var result = await customerModel.update(req.body, {
+            where: {
+                CustomerID_TFOra: Number(req.params.customerID_TFOra)
+            },
+            returning: true
+        });
 
-        res.status(200).send(newCustomer)
-
+        //result = { ...result.dataValues, ...userInput }
+        res.status(200).send(result)
     } catch (err) {
         res.status(500).send(err)
     }
@@ -110,16 +112,22 @@ const Update_Customer_Attributes = async (req, res, next) => {
 
 
 const Bulk_Insert_Customers = async (req, res, next) => {
-    try {
+
+    let tran1; 
+    try {        
+        
+        tran1 = await sequelize.transaction();
         var customerModel = require('../../../models/domain/Customers')(sequelize, DataTypes)
 
-        customerModel.bulkCreate(req.body).then(() => {
-            //return customerModel.findAll();
-            res.status(200).send('OK');
-        }).catch(err => {
-            console.log(err)
-            res.status(500).send('NOK');
-        })
+
+        await customerModel.destroy({ where: {} }, { transaction: tran1 });
+        await customerModel.bulkCreate(req.body, { transaction: tran1 });
+
+        // commit
+        await tran1.commit();
+        res.status(200).send('OK');
+
+        
     } catch (err) {
         res.status(500).send(err)
     }
@@ -130,30 +138,60 @@ const Bulk_Update_Customers = async (req, res, next) => {
     try {
         var customerModel = require('../../../models/domain/Customers')(sequelize, DataTypes)
 
-        customerModel.bulkCreate(req.body,
-            {
-                updateOnDuplicate: [
-                    "CustomerID_TFOra",
-                    "CustomerID",
-                    "CutomerFamily",
-                    "MandeEtebar"
-                ]
-            }).then(() => {
-                res.status(200).send('OK');
-            }).catch(err => {
-                console.log(err)
-                res.status(500).send('NOK');
-            })
+        var tran1 = await sequelize.transaction();
+        const promises = []
+
+        req.body.forEach(async (rec) => {
+            //console.log(rec)
+            const promise =  customerModel.update(rec,
+                {
+                    where: {
+                        CustomerID_TFOra: rec.CustomerID_TFOra
+                    },
+                    transaction: tran1
+                })
+                promises.push(promise)
+        });
+
+        await Promise.all(promises)
+
+        // commit
+        await tran1.commit();
+
+        res.sendStatus(200) // equivalent to res.status(200).send('OK')
+        // mssql does not support the updateOnDuplicate option
+        // customerModel.bulkCreate(req.body, 
+        //     {
+        //         updateOnDuplicate: [
+        //             "CustomerID_TFOra",
+        //             "MandeEtebar"
+        //         ]
+        //     }).then(() => {
+        //         res.status(200).send('OK');
+        //     }).catch(err => {
+        //         console.log(err)
+        //         res.status(500).send('NOK');
+        //     })
+        
     } catch (err) {
+        await tran1.rollback();
         res.status(500).send(err)
     }
 }
 
 
 const List_Customers_By_CenterIDtfOra = async (req, res, next) => {
-    try{
-                
-    } catch(err) {
+    try {
+        var customerModel = require('../../../models/domain/Customers')(sequelize, DataTypes)
+
+        const allCustomers = await customerModel.findAll({
+            where: {
+                CenterID: req.params.centerID
+            }
+        });
+
+        res.status(200).send(allCustomers)
+    } catch (err) {
         res.status(500).send(err)
     }
 }

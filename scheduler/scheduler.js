@@ -36,8 +36,8 @@ const SYNC_SQL_WITH_ORA_Products = async () => {
             throw new Error('No rows returned from V_STUFF_DETAIL')
         }
 
-        
-        
+
+
         // let output = [];
         // list.rows.map(rec => {
         //     let obj = new OrderModel(rec);
@@ -46,16 +46,40 @@ const SYNC_SQL_WITH_ORA_Products = async () => {
 
         console.log(list.rows)
 
-        let tran1;
-        tran1 = await sequelize.transaction();
-        var productModel = require('../models/domain/Product_Repository')(sequelize, DataTypes)
-    
-    
-        await productModel.destroy({ where: {} }, { transaction: tran1 });
-        await productModel.bulkCreate(list.rows, { transaction: tran1 });
-    
-        // commit
-        await tran1.commit();
+        // let tran1;
+        // tran1 = await sequelize.transaction();
+        // var productModel = require('../models/domain/Product_Repository')(sequelize, DataTypes)
+
+
+        // await productModel.destroy({ where: {} }, { transaction: tran1 });
+        // await productModel.bulkCreate(list.rows, { transaction: tran1 });
+
+        // // commit
+        // await tran1.commit();
+
+
+
+        // const FormData = require('form-data');
+        // const form = new FormData();
+        // form.append('my_field', 'my value');
+        // form.append('my_buffer', new Buffer(10));
+        // form.append('my_file', fs.createReadStream('/foo/bar.jpg'));
+        // axios.post('https://example.com', form, { headers: form.getHeaders() })
+
+        let result = await axios({
+            method: 'post',
+            url: 'http://localhost:5000/api/v1/products/bulk',
+            data: list.rows,
+            timeout: 500000, // 5 minutes
+            headers: { 'X-Custom-Header': 'foobar' }
+        });
+
+        if(result.status == 200) {
+            console.log('Transaction Performed Successfully ! at: '+ new Date().toLocaleTimeString())
+        } else {
+            console.log('Sync Operation failed')
+            console.log(result)
+        }
 
 
     } catch (err) {

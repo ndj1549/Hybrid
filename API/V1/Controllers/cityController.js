@@ -72,10 +72,24 @@ const List_Cities_Of_Ostan = async (req, res, next) => {
 }
 
 
+const List_OstanCity = async (req, res, next) => {
+  try {
+
+    const { City, Ostan } = require('../../../models/domain/init-models')(sequelize, DataTypes)
+    const mmm = await City.findAll({ include: Ostan })
+
+    res.status(200).send(mmm)
+  } catch (err) {
+    res.status(500).send(err)
+  }
+}
+
+
 module.exports = {
     List_Ostans,
     List_Cities,
     Get_Ostan_By_ID,
     Get_City_By_ID,
     List_Cities_Of_Ostan
+    //List_OstanCity
 }

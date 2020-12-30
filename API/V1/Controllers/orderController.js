@@ -45,13 +45,16 @@ const Save_Order_On_Insert = async (req, res, next) => {
 
 const List_Orders_Of_Today = async (req, res, next) => {
     const m = moment();
-    console.log(m.format('YYYY-MM-DD'))
+    const currentDate = m.format('YYYY-MM-DD')
+    console.log(currentDate)
 
     try {
         const { Orders, OrderDetails } = require('../../../models/domain/init-models')(sequelize, DataTypes)
         const result = await Orders.findAll({
             where: {
-                OrderDate: m.format('YYYY-MM-DD') // gregorian date
+                OrderDate: {
+                    [Op.gte]: currentDate //m.add(1, 'day').format('YYYY-MM-DD')// gregorian date
+                }
             },
             include: OrderDetails
         })
@@ -157,7 +160,7 @@ const List_Orders_ByTIG_OraRead = async (req, res, next) => {
         const { Orders, OrderDetails } = require('../../../models/domain/init-models')(sequelize, DataTypes)
         const result = await Orders.findAll({
             where: {
-                OracleRead : parseInt(req.params.oraRead)
+                OracleRead: parseInt(req.params.oraRead)
             },
             include: OrderDetails
         })
@@ -170,7 +173,18 @@ const List_Orders_ByTIG_OraRead = async (req, res, next) => {
 
 
 const Change_Order_Status = async (req, res, next) => {
+    try {
+        const { Orders } = require('../../../models/domain/init-models')(sequelize, DataTypes)
+        await Orders.update({ OrderStatusID: req.params.statusID }, {
+            where: {
+                OrderID: req.params.orderID
+            }            
+        })
 
+        res.status(200).send()
+    } catch (err) {
+        res.status(500).send(err)
+    }
 }
 
 
@@ -181,6 +195,7 @@ module.exports = {
     List_Orders_Of_Today,
     Set_OracleRead_Flag,
     List_Orders_ByTIG_OraRead,
+    Change_Order_Status,
     // List_Orders_Made_By_UserID,
     // Get_Details_Of_OrderID
     List_Orders_From_To,
