@@ -128,11 +128,48 @@ const Bulk_Insert_Products = async (req, res, next) => {
 
 const Increment_Product_Mojudi = async (req, res, next) => {
 
+  try {
+    var productModel = require('../../../models/domain/Product_Repository')(sequelize, DataTypes)
+
+    productModel.increment('MOJUDI', {
+      by: Number(req.params.input),
+      where: {
+        [Op.and]: [
+          { PRODUCTIDORA: Number(req.params.productID) },
+          { CENTERID: Number(req.params.centerID) },
+        ]
+      }
+    })
+
+    res.sendStatus(200)
+
+  } catch (err) {
+    res.status(500).send(err)
+  }
 }
 
-const Update_Product_Attributes = async (req, res, next) => {
 
+const Set_Mojudi_Kala = async (req, res, next) => {
+  try {
+    var productModel = require('../../../models/domain/Product_Repository')(sequelize, DataTypes)
+
+    await productModel.update({ MOJUDI: Number(req.params.input) }, {
+      where: {
+        [Op.and]: [
+          { PRODUCTIDORA: Number(req.params.productID) },
+          { CENTERID: Number(req.params.centerID) },
+        ]
+      }
+    })
+
+    res.sendStatus(200)
+
+  } catch (err) {
+    res.status(500).send(err)
+  }
 }
+
+
 
 // const Simple_Select_EagerLoad = async (req, res, next) => {
 //   try {
@@ -154,12 +191,14 @@ const Update_Product_Attributes = async (req, res, next) => {
 
 
 
-
 module.exports = {
   List_Category_Of_Products,
   List_Products,
   List_Products_By_Category,
   List_Products_By_Category_Paginated,
   //Simple_Select_EagerLoad,
-  Bulk_Insert_Products
+  //Update_Product_Attributes,
+  Bulk_Insert_Products,
+  Set_Mojudi_Kala,
+  Increment_Product_Mojudi
 }

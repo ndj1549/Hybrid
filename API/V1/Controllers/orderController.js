@@ -1,5 +1,6 @@
 const { Sequelize, DataTypes, Op, ValidationError } = require("sequelize")
 const { sequelize } = require('../../../startup/db')
+const _ = require('lodash')
 const moment = require('jalali-moment')
 
 
@@ -13,18 +14,21 @@ const Save_Order_On_Insert = async (req, res, next) => {
     try {
         //console.log(req.body)
         // run validation
-        // return 400 if not validated
+        // return 400 if not validated        
         tran1 = await sequelize.transaction();
 
-        const newOrder = await Orders.create(req.body.header, { transaction: tran1 });
+        let order_header = _.pick(req.body, ['CustomerID_TFOra','UserID','ShippedDate','ShipCity','ShipAddress','OrderStatusID', 'OracleRead'])
+
+        const newOrder = await Orders.create(order_header, { transaction: tran1 });
         //console.log(newOrder.dataValues)
         var list = []
-        req.body.details.forEach(rec => {
-            rec = { ...rec, OrderID: newOrder.dataValues.OrderID }
+        req.body.OrderDetails.forEach(rec => {
+            rec = { ...rec, OrderID: Number(newOrder.dataValues.OrderID) }
             //rec['OrderID'] = newOrder.dataValues.OrderID
             list.push(rec)
         })
 
+        list = _.map(list, o => _.omit(o, ['OrderDetID']));
         OrderDetails.bulkCreate(list, { transaction: tran1 }).then(async () => {
 
             // commit
@@ -142,13 +146,13 @@ const Set_OracleRead_Flag = async (req, res, next) => {
     // console.log(FLAG === '1' )
     try {
         const { Orders } = require('../../../models/domain/init-models')(sequelize, DataTypes)
-        await Orders.update({ OracleRead: FLAG, OrderStatusID: FLAG === '1' ? STATUS_PENDING : STATUS_SAVED }, {
+        await Orders.update({ OracleRead: Number(FLAG), OrderStatusID: FLAG === '1' ? STATUS_PENDING : STATUS_SAVED }, {
             where: {
-                OrderID: req.params.orderID
+                OrderID: Number(req.params.orderID)
             }
         })
 
-        res.status(200).send();
+        res.status(200).send('OK');
     } catch (err) {
         res.status(500).send(err)
     }

@@ -13,6 +13,7 @@ const CityController = require('./Controllers/cityController')
 const OrderController = require('./Controllers/orderController')
 const customerController = require('./Controllers/customerController')
 const centerController = require('./Controllers/centerController')
+const statusController = require('./Controllers/statusController')
 
 
 
@@ -25,6 +26,8 @@ router.get('/products/cat/:catID', ProductController.List_Products_By_Category)
 router.get('/products/cat/:catID/page-:page', ProductController.List_Products_By_Category_Paginated)
 //router.get('/products/eager', ProductController.Simple_Select_EagerLoad)
 router.post('/products/bulk', ProductController.Bulk_Insert_Products)
+router.put('/products/:productID/center/:centerID/mojudi/:input', ProductController.Set_Mojudi_Kala)
+router.put('/products/:productID/center/:centerID/inc/:input', ProductController.Increment_Product_Mojudi)
 
 
 
@@ -37,6 +40,7 @@ router.get('/customers/city/:cityID', customerController.List_Customers_By_CityI
 router.get('/customers/center/:centerID', )
 router.post('/customers', customerController.Insert_New_Customer)
 router.post('/customers/bulk', customerController.Bulk_Insert_Customers)
+router.delete('/customers/:customerID', customerController.Delete_Customer)
 
 
 
@@ -58,6 +62,8 @@ router.get('/orders/oraread/:oraRead', OrderController.List_Orders_ByTIG_OraRead
 router.put('/orders/:orderID/set/oraread/:bit', OrderController.Set_OracleRead_Flag)
 router.put('/orders/:orderID/setStatus/:statusID', OrderController.Change_Order_Status)
 
+
+router.get('/status', statusController.List_Status)
 
 
 router.get('/centers', centerController.List_All_Centers)

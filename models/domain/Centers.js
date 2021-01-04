@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
     CenterName: {
       type: DataTypes.STRING(50),
       allowNull: true
+    },
+    LastUpdate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: Sequelize.fn('getdate')
     }
   }, {
     sequelize,

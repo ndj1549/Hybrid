@@ -1,5 +1,6 @@
 const { Sequelize, DataTypes, Op, ValidationError } = require("sequelize")
 const { sequelize } = require('../../../startup/db')
+const _ = require('lodash')
 
 
 const List_Cutomers = async (req, res, next) => {
@@ -20,10 +21,11 @@ const Get_Customer_By_ID = async (req, res, next) => {
 
         const result = await customerModel.findOne({
             where: {
-                [Op.or]: [
-                    { CustomerID_TFOra: req.params.customerID },
-                    { CustomerID: req.params.customerID }
-                ]
+                // [Op.or]: [
+                //     { CustomerID_TFOra: req.params.customerID },
+                //     { CustomerID: req.params.customerID }
+                // ]
+                CustomerID_TFOra: Number(req.params.customerID)
             }
         });
 
@@ -94,8 +96,9 @@ const Update_Customer_Attributes = async (req, res, next) => {
         // }
 
         //let userInput = _.pick(req.body, ['', ''])
+        let input = _.pickBy(req.body, _.identity)
 
-        var result = await customerModel.update(req.body, {
+        var result = await customerModel.update(input, {
             where: {
                 CustomerID_TFOra: Number(req.params.customerID_TFOra)
             },
@@ -113,9 +116,9 @@ const Update_Customer_Attributes = async (req, res, next) => {
 
 const Bulk_Insert_Customers = async (req, res, next) => {
 
-    let tran1; 
-    try {        
-        
+    let tran1;
+    try {
+
         tran1 = await sequelize.transaction();
         var customerModel = require('../../../models/domain/Customers')(sequelize, DataTypes)
 
@@ -127,7 +130,7 @@ const Bulk_Insert_Customers = async (req, res, next) => {
         await tran1.commit();
         res.status(200).send('OK');
 
-        
+
     } catch (err) {
         res.status(500).send(err)
     }
@@ -143,14 +146,14 @@ const Bulk_Update_Customers = async (req, res, next) => {
 
         req.body.forEach(async (rec) => {
             //console.log(rec)
-            const promise =  customerModel.update(rec,
+            const promise = customerModel.update(rec,
                 {
                     where: {
                         CustomerID_TFOra: rec.CustomerID_TFOra
                     },
                     transaction: tran1
                 })
-                promises.push(promise)
+            promises.push(promise)
         });
 
         await Promise.all(promises)
@@ -172,7 +175,7 @@ const Bulk_Update_Customers = async (req, res, next) => {
         //         console.log(err)
         //         res.status(500).send('NOK');
         //     })
-        
+
     } catch (err) {
         await tran1.rollback();
         res.status(500).send(err)
@@ -197,6 +200,23 @@ const List_Customers_By_CenterIDtfOra = async (req, res, next) => {
 }
 
 
+const Delete_Customer = async (req, res, next) => {
+    try {
+        var customerModel = require('../../../models/domain/Customers')(sequelize, DataTypes)
+
+        await customerModel.destroy({
+            where: {                
+                CustomerID_TFOra: Number(req.params.customerID)
+            }
+        });
+
+        res.status(200).send('OK')
+    } catch (err) {
+        res.status(500).send(err)
+    }
+}
+
+
 module.exports = {
     List_Cutomers,
     Get_Customer_By_ID,
@@ -205,5 +225,6 @@ module.exports = {
     Update_Customer_Attributes,
     Insert_New_Customer,
     Bulk_Insert_Customers,
-    Bulk_Update_Customers
+    Bulk_Update_Customers,
+    Delete_Customer
 }
