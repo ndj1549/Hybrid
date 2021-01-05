@@ -3,6 +3,7 @@ const { sequelize } = require('../startup/db')
 const config = require('config')
 const axios = require('axios')
 const oracleDB = require('oracledb')
+const _ = require('lodash')
 
 const dbConfig = {
     user: config.get('connStr.oracle.user'),
@@ -12,6 +13,74 @@ const dbConfig = {
 
 
 
+const SYNC_SQL_WITH_ORA_Centers = async () => {
+    let connection;
+    try {
+        connection = await oracleDB.getConnection(dbConfig);
+
+        const list = await connection.execute("select TAF_CODE AS CenterID_Ora \
+                                                     ,TAF_NAME AS CenterName \
+                                               from  V_HBRD_CENTER", [], { outFormat: oracleDB.OUT_FORMAT_OBJECT });
+
+        if (list.rows.length === 0) {
+            throw new Error('No rows returned from V_HBRD_CENTER')
+        }
+
+
+        console.log(list.rows)
+
+
+        // var keyMap = {
+        //     CENTERID_ORA: 'CenterID_Ora',
+        //     CENTERNAME: 'CenterName'
+        // };
+
+        // var newList = []
+        // const newThing = [];
+
+        // list.rows.map(item => {
+        //     newList.push(
+        //         _.mapKeys(item, (value, key) => {
+        //             return keyMap(key)                   
+        //         })
+        //     )
+        // });
+
+        // console.log(newList)
+
+
+        let result = await axios({
+            method: 'post',
+            url: 'http://localhost:5000/api/v1/centers/bulk',
+            data: list.rows,// newList
+            timeout: 500000, // 5 minutes
+            //headers: { 'X-Custom-Header': 'foobar' }
+        });
+
+        if (result.status == 200) {
+            console.log('Transaction Performed Successfully ! at: ' + new Date().toLocaleTimeString())
+        } else {
+            console.log('Sync Operation failed')
+            console.log(result)
+        }
+
+
+    } catch (err) {
+        console.log(err);
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+}
+
+const SYNC_SQL_WITH_ORA_CustomerMandeEtebar = async () => {
+
+}
 
 const SYNC_SQL_WITH_ORA_Products = async () => {
     let connection;
@@ -30,7 +99,7 @@ const SYNC_SQL_WITH_ORA_Products = async () => {
                                                    PACK_NAME AS PackageName,\
                                                    PACK_VALUE AS PackageQuantity,\
                                                    PACK_WEIGHT AS PackageWeight\
-                                                   from V_STUFF_DETAIL", [], { outFormat: oracleDB.OUT_FORMAT_OBJECT });
+                                                   from V_HBRD_STUFF_DETAIL", [], { outFormat: oracleDB.OUT_FORMAT_OBJECT });
 
         if (list.rows.length === 0) {
             throw new Error('No rows returned from V_STUFF_DETAIL')
@@ -68,14 +137,14 @@ const SYNC_SQL_WITH_ORA_Products = async () => {
 
         let result = await axios({
             method: 'post',
-            url: 'http://localhost:5000/api/v1/products/bulk',
+            url: 'http://192.168.87.61:5000/api/v1/products/bulk',
             data: list.rows,
             timeout: 500000, // 5 minutes
-            headers: { 'X-Custom-Header': 'foobar' }
+            //headers: { 'X-Custom-Header': 'foobar' }
         });
 
-        if(result.status == 200) {
-            console.log('Transaction Performed Successfully ! at: '+ new Date().toLocaleTimeString())
+        if (result.status == 200) {
+            console.log('Transaction Performed Successfully ! at: ' + new Date().toLocaleTimeString())
         } else {
             console.log('Sync Operation failed')
             console.log(result)
@@ -97,7 +166,10 @@ const SYNC_SQL_WITH_ORA_Products = async () => {
 
 
 
-module.exports = SYNC_SQL_WITH_ORA_Products
+module.exports = {
+    SYNC_SQL_WITH_ORA_Products,
+    SYNC_SQL_WITH_ORA_Centers
+}
 
 
 

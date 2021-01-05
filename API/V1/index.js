@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize")
 const { poolPromise, sequelize } = require('../../startup/db')
+const  timeLimitMiddleware  = require('../../middlewares/timeLimitMiddleware')
 const express = require('express')
 const router = express.Router()
 const params = require('express-params')
@@ -53,14 +54,14 @@ router.get('/city/:cityID', CityController.Get_City_By_ID)
 
 
 
-router.post('/orders', OrderController.Save_Order_On_Insert)
+router.post('/orders', timeLimitMiddleware, OrderController.Save_Order_On_Insert)
 router.param('orderID', /^[0-9]+$/) // forcing the orderID parameter to be int
 router.get('/orders/:orderID', OrderController.Get_Order_By_ID)
 router.get('/orders/today', OrderController.List_Orders_Of_Today)
 router.get('/orders/from/:FROM/to/:TO', OrderController.List_Orders_From_To)
 router.get('/orders/oraread/:oraRead', OrderController.List_Orders_ByTIG_OraRead)
-router.put('/orders/:orderID/set/oraread/:bit', OrderController.Set_OracleRead_Flag)
-router.put('/orders/:orderID/setStatus/:statusID', OrderController.Change_Order_Status)
+router.put('/orders/:orderID/set/oraread/:bit',timeLimitMiddleware, OrderController.Set_OracleRead_Flag)
+router.put('/orders/:orderID/setStatus/:statusID',timeLimitMiddleware, OrderController.Change_Order_Status)
 
 
 router.get('/status', statusController.List_Status)

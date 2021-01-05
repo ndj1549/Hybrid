@@ -1,3 +1,4 @@
+const { MyErrorHandler } = require('../../../Utils/error')
 const { Sequelize, DataTypes, Op } = require("sequelize")
 const { sequelize } = require('../../../startup/db')
 
@@ -16,7 +17,8 @@ const Insert_New_Center = async (req, res, next) => {
 
         res.status(200).send(newCenter)
     } catch (err) {
-        res.status(500).send(err)
+        //next(new MyErrorHandler(500, err))
+        next(err)
     }
 }
 
@@ -28,7 +30,7 @@ const List_All_Centers = async (req, res, next) => {
         const allCenters = await centerModel.findAll();
         res.status(200).send(allCenters)
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }
 
@@ -44,11 +46,11 @@ const Get_Center_By_ID = async (req, res, next) => {
         });
 
         if (!result) {
-            res.status(404).send()
+            throw new MyErrorHandler(404, 'Center Not Found')
         }
         res.status(200).send(result)
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }
 
@@ -56,8 +58,8 @@ const Get_Center_By_ID = async (req, res, next) => {
 const Edit_Center = async (req, res, next) => {
     try {
         var { Centers } = require('../../../models/domain/init-models')(sequelize, DataTypes)
-        
-        
+
+
         // if(! Validate(req.body)) {
         //     res.status(400).send()
         // }
@@ -71,7 +73,7 @@ const Edit_Center = async (req, res, next) => {
         //result = { ...result.dataValues, ...userInput }
         res.status(200).send(result)
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }
 
@@ -80,18 +82,22 @@ const Bulk_Insert_Centers = async (req, res, next) => {
     let tran1;
     try {
         tran1 = await sequelize.transaction();
-        var centerModel = require('../../../models/domain/Centers')(sequelize, DataTypes)
+        var { Centers } = require('../../../models/domain/init-models')(sequelize)
 
-
-        await centerModel.destroy({ where: {} }, { transaction: tran1 });
-        await centerModel.bulkCreate(req.body, { transaction: tran1 });
+        // const resultTran = await sequelize.transaction( (t) => {
+        //     promises.push(Centers.destroy({ where: {} , transaction: t}))
+        //     promises.push(Centers.bulkCreate(req.body, { transaction: t }))
+        //     return Promise.all(promises);
+        // });
+        await Centers.destroy({ where: {}, transaction: t })
+        await Centers.bulkCreate(req.body, { transaction: t })
 
         // commit
         await tran1.commit();
         res.status(200).send('OK');
     } catch (err) {
         await tran1.rollback();
-        res.status(500).send(err)
+        next(err)
     }
 }
 

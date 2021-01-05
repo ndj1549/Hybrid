@@ -1,3 +1,4 @@
+const { MyErrorHandler } = require('../../../Utils/error')
 const { Sequelize, DataTypes, Op, ValidationError } = require("sequelize")
 const { sequelize } = require('../../../startup/db')
 const _ = require('lodash')
@@ -10,7 +11,7 @@ const List_Cutomers = async (req, res, next) => {
         const allCustomers = await customerModel.findAll();
         res.status(200).send(allCustomers)
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }
 
@@ -30,11 +31,12 @@ const Get_Customer_By_ID = async (req, res, next) => {
         });
 
         if (!result) {
-            res.status(404).send()
+            throw new MyErrorHandler(404, 'Customer Not Found')
         }
+
         res.status(200).send(result)
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }
 
@@ -49,7 +51,7 @@ const List_Customers_By_CityID = async (req, res, next) => {
         });
         res.status(200).send(allCustomers)
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }
 
@@ -71,7 +73,7 @@ const Insert_New_Customer = async (req, res, next) => {
         res.status(200).send(newCustomer)
 
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }
 
@@ -95,7 +97,9 @@ const Update_Customer_Attributes = async (req, res, next) => {
         //     res.status(400).send()
         // }
 
-        //let userInput = _.pick(req.body, ['', ''])
+        
+        
+        // filter out null attributes
         let input = _.pickBy(req.body, _.identity)
 
         var result = await customerModel.update(input, {
@@ -108,7 +112,7 @@ const Update_Customer_Attributes = async (req, res, next) => {
         //result = { ...result.dataValues, ...userInput }
         res.status(200).send(result)
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }
 
@@ -123,7 +127,7 @@ const Bulk_Insert_Customers = async (req, res, next) => {
         var customerModel = require('../../../models/domain/Customers')(sequelize, DataTypes)
 
 
-        await customerModel.destroy({ where: {} }, { transaction: tran1 });
+        await customerModel.destroy({ where: {} , transaction: tran1});
         await customerModel.bulkCreate(req.body, { transaction: tran1 });
 
         // commit
@@ -132,7 +136,8 @@ const Bulk_Insert_Customers = async (req, res, next) => {
 
 
     } catch (err) {
-        res.status(500).send(err)
+        await tran1.rollback();
+        next(err)
     }
 }
 
@@ -178,7 +183,7 @@ const Bulk_Update_Customers = async (req, res, next) => {
 
     } catch (err) {
         await tran1.rollback();
-        res.status(500).send(err)
+        next(err)
     }
 }
 
@@ -195,7 +200,7 @@ const List_Customers_By_CenterIDtfOra = async (req, res, next) => {
 
         res.status(200).send(allCustomers)
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }
 
@@ -205,14 +210,14 @@ const Delete_Customer = async (req, res, next) => {
         var customerModel = require('../../../models/domain/Customers')(sequelize, DataTypes)
 
         await customerModel.destroy({
-            where: {                
+            where: {
                 CustomerID_TFOra: Number(req.params.customerID)
             }
         });
 
         res.status(200).send('OK')
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }
 

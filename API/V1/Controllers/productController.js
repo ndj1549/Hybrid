@@ -1,6 +1,6 @@
 
-
-const { Sequelize, DataTypes } = require("sequelize");
+const { MyErrorHandler } = require('../../../Utils/error')
+const { Sequelize, DataTypes } = require("sequelize")
 const { sequelize } = require('../../../startup/db')
 
 
@@ -15,9 +15,8 @@ const List_Category_Of_Products = async (req, res, next) => {
         'Category_L1_Name']
     });
     res.status(200).send(allCats)
-  } catch (err) {
-    console.error('Unable to connect to the database:', err);
-    res.status(500).send(err)
+  } catch (err) {    
+    next(err)
   }
 }
 
@@ -32,7 +31,7 @@ const List_Products = async (req, res, next) => {
     const allProducts = await productRepo.findAll();
     res.status(200).send(allProducts)
   } catch (err) {
-    res.status(500).send(err)
+    next(err)
   }
 }
 
@@ -50,7 +49,7 @@ const List_Products_By_Category = async (req, res, next) => {
     });
     res.status(200).send(allProducts)
   } catch (err) {
-    res.status(500).send(err)
+    next(err)
   }
 }
 
@@ -79,7 +78,7 @@ const List_Products_By_Category_Paginated = async (req, res, next) => {
     }
 
   } catch (err) {
-    res.status(500).send(err)
+    next(err)
   }
 }
 
@@ -111,7 +110,7 @@ const Bulk_Insert_Products = async (req, res, next) => {
     var productModel = require('../../../models/domain/Product_Repository')(sequelize, DataTypes)
 
 
-    await productModel.destroy({ where: {} }, { transaction: tran1 });
+    await productModel.destroy({ where: {}, transaction: tran1 });
     await productModel.bulkCreate(req.body, { transaction: tran1 });
 
     // commit
@@ -122,7 +121,7 @@ const Bulk_Insert_Products = async (req, res, next) => {
 
   } catch (err) {
     await tran1.rollback();// Is this the right place?
-    res.status(500).send(err)
+    next(err)
   }
 }
 
@@ -144,7 +143,7 @@ const Increment_Product_Mojudi = async (req, res, next) => {
     res.sendStatus(200)
 
   } catch (err) {
-    res.status(500).send(err)
+    next(err)
   }
 }
 
@@ -165,7 +164,7 @@ const Set_Mojudi_Kala = async (req, res, next) => {
     res.sendStatus(200)
 
   } catch (err) {
-    res.status(500).send(err)
+    next(err)
   }
 }
 
@@ -183,7 +182,7 @@ const Set_Mojudi_Kala = async (req, res, next) => {
 //     });
 //     res.status(200).send(allProducts)
 //   } catch (err) {
-//     res.status(500).send(err)
+//     next(err)
 //   }
 // }
 

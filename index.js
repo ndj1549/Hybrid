@@ -1,8 +1,5 @@
 const morgan = require('morgan')
-const { DataTypes } = require("sequelize")
-const { sequelize } = require('./startup/db')
-const sql = require('mssql')
-const config = require('config')
+const errorMiddleware = require('./middlewares/errorMiddleware')
 const express = require('express')
 const app = express()
 
@@ -34,23 +31,14 @@ app.use('/api', require('./API'));
 app.get('/', (req, res) => {
     // throw new Error('woops');
     console.log('called / : at '+ new Date().toString())
-    res.status(200).send('OK');
+    res.status(200).send('OK'+new Date().toString());
 });
 
 
 
 
-
-// app.get('/cities2', async (req, res) => {
-//     try {
-//         await sql.connect('mssql://tabarok.ir_hd:123Qwe!@@185.128.81.55:1933/tabarok.ir_hybridsale')
-//         // const result = await sql.query`select * from mytable where id = ${value}`
-//         const result = await sql.query`SELECT * FROM [tabarok.ir_hybridsale].[dbo].[V_OstanCity]`
-//         res.status(200).send(result.recordset)
-//     } catch (err) {
-//         res.status(500).send(err)
-//     }
-// })
+// ----------------------------  Error Handler Middleware
+app.use(errorMiddleware);
 
 
 

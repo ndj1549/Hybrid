@@ -24,14 +24,14 @@ var schedule = require('node-schedule')
 // });
 
 
-const SYNC_SQL_WITH_ORA_Products = require('./scheduler')
+const { SYNC_SQL_WITH_ORA_Products, SYNC_SQL_WITH_ORA_Centers } = require('./scheduler')
 
-schedule.scheduleJob('* * * * * *', function () {    
-        
+schedule.scheduleJob('* * * * * *', function () {
+
     console.log(new Date().toLocaleTimeString())
 });
 
-schedule.scheduleJob('20 03 11 * * *', function () {
+schedule.scheduleJob('20 33 12 * * *', function () {
     // axios.get('http://localhost:5000/')
     //     .then(function (response) {
     //         // handle success
@@ -47,6 +47,11 @@ schedule.scheduleJob('20 03 11 * * *', function () {
 
     SYNC_SQL_WITH_ORA_Products()
 });
+
+
+schedule.scheduleJob('10 47 09 * * *', function() {
+    SYNC_SQL_WITH_ORA_Centers()
+})
 
 
 

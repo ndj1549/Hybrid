@@ -48,6 +48,27 @@
 // })
 
 
-const moment  =require('jalali-moment')
-const m = moment()
-console.log(m.format('YYYY-MM-DD'))
+// const moment  =require('jalali-moment')
+// const m = moment()
+// console.log(m.format('YYYY-MM-DD'))
+
+
+
+
+// app.get('/cities2', async (req, res) => {
+//     try {
+//         await sql.connect('mssql://tabarok.ir_hd:123Qwe!@@185.128.81.55:1933/tabarok.ir_hybridsale')
+//         // const result = await sql.query`select * from mytable where id = ${value}`
+//         const result = await sql.query`SELECT * FROM [tabarok.ir_hybridsale].[dbo].[V_OstanCity]`
+//         res.status(200).send(result.recordset)
+//     } catch (err) {
+//         res.status(500).send(err)
+//     }
+// })
+
+
+var now = new Date()
+//console.log(now.getHours())    
+console.log(new Date().toTimeString())
+console.log(new Date().toLocaleString())
+console.log(new Date().toLocaleTimeString())

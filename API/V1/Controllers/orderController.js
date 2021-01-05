@@ -1,7 +1,13 @@
+
+const { MyErrorHandler } = require('../../../Utils/error')
 const { Sequelize, DataTypes, Op, ValidationError } = require("sequelize")
 const { sequelize } = require('../../../startup/db')
 const _ = require('lodash')
 const moment = require('jalali-moment')
+
+
+
+
 
 
 var { Orders, OrderDetails } = require('../../../models/domain/init-models').initModels(sequelize)
@@ -17,7 +23,7 @@ const Save_Order_On_Insert = async (req, res, next) => {
         // return 400 if not validated        
         tran1 = await sequelize.transaction();
 
-        let order_header = _.pick(req.body, ['CustomerID_TFOra','UserID','ShippedDate','ShipCity','ShipAddress','OrderStatusID', 'OracleRead'])
+        let order_header = _.pick(req.body, ['CustomerID_TFOra', 'UserID', 'ShippedDate', 'ShipCity', 'ShipAddress', 'OrderStatusID', 'OracleRead'])
 
         const newOrder = await Orders.create(order_header, { transaction: tran1 });
         //console.log(newOrder.dataValues)
@@ -29,20 +35,29 @@ const Save_Order_On_Insert = async (req, res, next) => {
         })
 
         list = _.map(list, o => _.omit(o, ['OrderDetID']));
-        OrderDetails.bulkCreate(list, { transaction: tran1 }).then(async () => {
+        // OrderDetails.bulkCreate(list, { transaction: tran1 }).then(async () => {
+        //     // commit
+        //     await tran1.commit();
+        //     res.status(200).send(newOrder);
+        // }).catch(err => {
+        //     await tran1.rollback();// Is this the right place?
+        //     next(err)
+        // })
 
-            // commit
-            await tran1.commit();
-            res.status(200).send(newOrder);
-        }).catch(err => {
 
-            tran1.rollback();// Is this the right place?
-            res.status(500).send('NOK');
-        })
+        await OrderDetails.bulkCreate(list, { transaction: tran1 });
+
+        // update mojudi anbar
+
+
+        // commit
+        await tran1.commit();
+        res.status(200).send(newOrder);
 
 
     } catch (err) {
-        res.status(500).send(err)
+        await tran1.rollback();
+        next(err)
     }
 }
 
@@ -66,7 +81,7 @@ const List_Orders_Of_Today = async (req, res, next) => {
         res.status(200).send(result)
 
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }
 
@@ -90,7 +105,7 @@ const List_Orders_From_To = async (req, res, next) => {
         _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').format()
     }
 
-    console.log({ "from": _from, "to": _to })
+    // console.log({ "from": _from, "to": _to })
 
 
     try {
@@ -111,7 +126,7 @@ const List_Orders_From_To = async (req, res, next) => {
         res.status(200).send(result)
 
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }
 
@@ -125,10 +140,13 @@ const Get_Order_By_ID = async (req, res, next) => {
             include: OrderDetails
         })
 
+        if (!result) {
+            throw new MyErrorHandler(404, 'Order Not Found')
+        }
         res.status(200).send(result)
 
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }
 
@@ -154,7 +172,7 @@ const Set_OracleRead_Flag = async (req, res, next) => {
 
         res.status(200).send('OK');
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }
 
@@ -171,7 +189,7 @@ const List_Orders_ByTIG_OraRead = async (req, res, next) => {
 
         res.status(200).send(result)
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }
 
@@ -182,12 +200,12 @@ const Change_Order_Status = async (req, res, next) => {
         await Orders.update({ OrderStatusID: req.params.statusID }, {
             where: {
                 OrderID: req.params.orderID
-            }            
+            }
         })
 
         res.status(200).send()
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }
 
