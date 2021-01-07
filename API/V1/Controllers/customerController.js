@@ -151,7 +151,7 @@ const Bulk_Update_Customers = async (req, res, next) => {
 
         req.body.forEach(async (rec) => {
             //console.log(rec)
-            const promise = customerModel.update(rec,
+            const promise = customerModel.update(_.pick(rec, ['MandeEtebar']),
                 {
                     where: {
                         CustomerID_TFOra: rec.CustomerID_TFOra

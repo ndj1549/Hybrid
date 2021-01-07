@@ -89,8 +89,8 @@ const Bulk_Insert_Centers = async (req, res, next) => {
         //     promises.push(Centers.bulkCreate(req.body, { transaction: t }))
         //     return Promise.all(promises);
         // });
-        await Centers.destroy({ where: {}, transaction: t })
-        await Centers.bulkCreate(req.body, { transaction: t })
+        await Centers.destroy({ where: {}, transaction: tran1 })
+        await Centers.bulkCreate(req.body, { transaction: tran1 })
 
         // commit
         await tran1.commit();
