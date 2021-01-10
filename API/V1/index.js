@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize")
 const { poolPromise, sequelize } = require('../../startup/db')
-const  timeLimitMiddleware  = require('../../middlewares/timeLimitMiddleware')
+const timeLimitMiddleware = require('../../middlewares/timeLimitMiddleware')
 const express = require('express')
 const router = express.Router()
 const params = require('express-params')
@@ -25,24 +25,27 @@ router.get('/products/cat', ProductController.List_Category_Of_Products)
 router.get('/products', ProductController.List_Products)
 router.get('/products/cat/:catID', ProductController.List_Products_By_Category)
 router.get('/products/cat/:catID/page-:page', ProductController.List_Products_By_Category_Paginated)
-//router.get('/products/eager', ProductController.Simple_Select_EagerLoad)
-router.post('/products/bulk', ProductController.Bulk_Insert_Products)
-router.put('/products/:productID/center/:centerID/mojudi/:input', ProductController.Set_Mojudi_Kala)
-router.put('/products/:productID/center/:centerID/inc/:input', ProductController.Increment_Product_Mojudi)
+if (process.env.NODE_ENV === 'server61') {
+    router.post('/products/bulk', ProductController.Bulk_Insert_Products)
+    router.put('/products/:productID/center/:centerID/mojudi/:input', ProductController.Set_Mojudi_Kala)
+    router.put('/products/:productID/center/:centerID/inc/:input', ProductController.Increment_Product_Mojudi)
+}
 
 
 
-//router.get('/customers', customerController.List_Cutomers)
+
 router.get('/customers/:customerID', customerController.Get_Customer_By_ID)
-router.param('customerID_TFOra', /^[0-9]+$/) // forcing the orderID parameter to be int
-router.put('/customers/:customerID_TFOra', customerController.Update_Customer_Attributes)
-router.put('/customers/bulk', customerController.Bulk_Update_Customers)
 router.get('/customers/city/:cityID', customerController.List_Customers_By_CityID)
-router.get('/customers/center/:centerID', )
-router.post('/customers', customerController.Insert_New_Customer)
-router.post('/customers/bulk', customerController.Bulk_Insert_Customers)
-router.delete('/customers/:customerID', customerController.Delete_Customer)
-
+router.get('/customers/center/:centerID',)
+if (process.env.NODE_ENV === 'server61') {
+    router.param('customerID_TFOra', /^[0-9]+$/) // forcing the orderID parameter to be int
+    router.put('/customers/:customerID_TFOra', customerController.Update_Customer_Attributes)
+    router.get('/customers', customerController.List_Cutomers)
+    router.put('/customers/bulk', customerController.Bulk_Update_Customers)
+    router.post('/customers', customerController.Insert_New_Customer)
+    router.post('/customers/bulk', customerController.Bulk_Insert_Customers)
+    router.delete('/customers/:customerID', customerController.Delete_Customer)
+}
 
 
 
@@ -59,9 +62,14 @@ router.param('orderID', /^[0-9]+$/) // forcing the orderID parameter to be int
 router.get('/orders/:orderID', OrderController.Get_Order_By_ID)
 router.get('/orders/today', OrderController.List_Orders_Of_Today)
 router.get('/orders/from/:FROM/to/:TO', OrderController.List_Orders_From_To)
-router.get('/orders/oraread/:oraRead', OrderController.List_Orders_ByTIG_OraRead)
-router.put('/orders/:orderID/set/oraread/:bit',timeLimitMiddleware, OrderController.Set_OracleRead_Flag)
-router.put('/orders/:orderID/setStatus/:statusID',timeLimitMiddleware, OrderController.Change_Order_Status)
+router.put('/orders/:orderID/setStatus/:statusID', timeLimitMiddleware, OrderController.Change_Order_Status)
+if (process.env.NODE_ENV === 'server61') {
+    router.get('/orders/oraread/:oraRead', OrderController.List_Orders_ByTIG_OraRead)
+    router.put('/orders/:orderID/set/oraread/:bit', timeLimitMiddleware, OrderController.Set_OracleRead_Flag)
+    router.delete('/orders/:orderID', OrderController.Delete_Order)
+}
+router.post('/orders/test', OrderController.test)
+
 
 
 router.get('/status', statusController.List_Status)
@@ -69,9 +77,11 @@ router.get('/status', statusController.List_Status)
 
 router.get('/centers', centerController.List_All_Centers)
 router.get('/centers/:centerID', centerController.Get_Center_By_ID)
-router.post('/centers', centerController.Insert_New_Center)
-router.put('/centers/:centerID', centerController.Edit_Center)
-router.post('/centers/bulk', centerController.Bulk_Insert_Centers)
+if (process.env.NODE_ENV === 'server61') {
+    router.post('/centers', timeLimitMiddleware, centerController.Insert_New_Center)
+    router.put('/centers/:centerID', timeLimitMiddleware, centerController.Edit_Center)
+    router.post('/centers/bulk', centerController.Bulk_Insert_Centers)
+}
 
 
 

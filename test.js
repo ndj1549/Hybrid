@@ -67,8 +67,20 @@
 // })
 
 
-var now = new Date()
-//console.log(now.getHours())    
-console.log(new Date().toTimeString())
-console.log(new Date().toLocaleString())
-console.log(new Date().toLocaleTimeString())
+// var now = new Date()
+// //console.log(now.getHours())    
+// console.log(new Date().toTimeString())
+// console.log(new Date().toLocaleString())
+// console.log(new Date().toLocaleTimeString())
+
+
+
+// var timestamp = new Date().getUTCMilliseconds();
+// console.log(timestamp)
+
+
+var jwt = require('jsonwebtoken');
+var token = jwt.sign({ foo: 'bar' }, 'shhhhh');
+console.log(token)
+console.log(Math.floor(Date.now() / 1000))
+

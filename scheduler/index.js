@@ -30,7 +30,7 @@ schedule.scheduleJob('20 33 12 * * *', function () {
 });
 
 
-schedule.scheduleJob('10 06 10 * * *', function() {
+schedule.scheduleJob('10 14 10 * * *', function() {
     SYNC_SQL_WITH_ORA_Centers()
 })
 
