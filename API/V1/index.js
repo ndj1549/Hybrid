@@ -15,7 +15,7 @@ const OrderController = require('./Controllers/orderController')
 const customerController = require('./Controllers/customerController')
 const centerController = require('./Controllers/centerController')
 const statusController = require('./Controllers/statusController')
-
+const userController = require('./Controllers/userController')
 
 
 
@@ -46,6 +46,9 @@ if (process.env.NODE_ENV === 'server61') {
     router.post('/customers/bulk', customerController.Bulk_Insert_Customers)
     router.delete('/customers/:customerID', customerController.Delete_Customer)
 }
+
+
+router.post('/users/signin', userController.sign_in)
 
 
 

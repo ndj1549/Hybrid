@@ -79,8 +79,9 @@
 // console.log(timestamp)
 
 
-var jwt = require('jsonwebtoken');
-var token = jwt.sign({ foo: 'bar' }, 'shhhhh');
-console.log(token)
-console.log(Math.floor(Date.now() / 1000))
-
+// var jwt = require('jsonwebtoken');
+// var token = jwt.sign({ foo: 'bar' }, 'shhhhh');
+// console.log(token)
+// console.log(Math.floor(Date.now() / 1000))
+const randtoken = require('rand-token')
+console.log(randtoken.uid(32))
