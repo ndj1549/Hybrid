@@ -79,9 +79,31 @@
 // console.log(timestamp)
 
 
-// var jwt = require('jsonwebtoken');
-// var token = jwt.sign({ foo: 'bar' }, 'shhhhh');
-// console.log(token)
-// console.log(Math.floor(Date.now() / 1000))
-const randtoken = require('rand-token')
-console.log(randtoken.uid(32))
+var jwt = require('jsonwebtoken');
+
+var tokenBody = {
+    'ID': 'TIG', 
+    'CID': 'TIG',
+    'PR': true,
+}
+
+
+var token = jwt.sign(tokenBody, 'shhhhh', {expiresIn: '10947d'});
+console.log(token)
+console.log(Math.floor(Date.now() / 1000))
+
+
+// const randtoken = require('rand-token')
+// console.log(randtoken.uid(32))
+
+
+// var decoded = jwt.decode(token, {complete: true});
+// console.log(decoded.header);
+// console.log(decoded.payload)
+var decoded = jwt.decode(token);
+console.log(decoded)
+// console.log(Date.parse(decoded.iat) < Date.parse(decoded.exp))
+console.log(decoded.iat < decoded.exp)
+
+var str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0IjoibUZHV1N4TzJ1dGJ2ZkRET3RFblhhWUNUdFRaYldqU2YiLCJpYXQiOjE2MTAzNTMyODksImV4cCI6MTYxMDQzOTY4OX0.V-CncB76KBTaM3vXLogdUTA7KiJtJBUy8IdK1yi25Bg"
+console.log(str.length)

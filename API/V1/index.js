@@ -1,6 +1,7 @@
-const { DataTypes } = require("sequelize")
-const { poolPromise, sequelize } = require('../../startup/db')
+
+// const { poolPromise, sequelize } = require('../../startup/db')
 const timeLimitMiddleware = require('../../middlewares/timeLimitMiddleware')
+const AuthMiddleware = require('../../middlewares/authMiddleware')
 const express = require('express')
 const router = express.Router()
 const params = require('express-params')
@@ -16,15 +17,16 @@ const customerController = require('./Controllers/customerController')
 const centerController = require('./Controllers/centerController')
 const statusController = require('./Controllers/statusController')
 const userController = require('./Controllers/userController')
+const authMiddleware = require("../../middlewares/authMiddleware")
 
 
 
 
-router.get('/products/cat', ProductController.List_Category_Of_Products)
+router.get('/products/cat', AuthMiddleware, ProductController.List_Category_Of_Products)
 //router.get('/products/subcat', ProductController.)
-router.get('/products', ProductController.List_Products)
-router.get('/products/cat/:catID', ProductController.List_Products_By_Category)
-router.get('/products/cat/:catID/page-:page', ProductController.List_Products_By_Category_Paginated)
+router.get('/products', AuthMiddleware, ProductController.List_Products)
+router.get('/products/cat/:catID', AuthMiddleware, ProductController.List_Products_By_Category)
+router.get('/products/cat/:catID/page-:page', AuthMiddleware, ProductController.List_Products_By_Category_Paginated)
 if (process.env.NODE_ENV === 'server61') {
     router.post('/products/bulk', ProductController.Bulk_Insert_Products)
     router.put('/products/:productID/center/:centerID/mojudi/:input', ProductController.Set_Mojudi_Kala)
@@ -34,13 +36,13 @@ if (process.env.NODE_ENV === 'server61') {
 
 
 
-router.get('/customers/:customerID', customerController.Get_Customer_By_ID)
-router.get('/customers/city/:cityID', customerController.List_Customers_By_CityID)
-router.get('/customers/center/:centerID',)
+router.get('/customers/:customerID', authMiddleware, customerController.Get_Customer_By_ID)
+router.get('/customers/city/:cityID', authMiddleware, customerController.List_Customers_By_CityID)
+// router.get('/customers/center/:centerID',)
+router.get('/customers', authMiddleware, customerController.List_Cutomers)
 if (process.env.NODE_ENV === 'server61') {
     router.param('customerID_TFOra', /^[0-9]+$/) // forcing the orderID parameter to be int
     router.put('/customers/:customerID_TFOra', customerController.Update_Customer_Attributes)
-    router.get('/customers', customerController.List_Cutomers)
     router.put('/customers/bulk', customerController.Bulk_Update_Customers)
     router.post('/customers', customerController.Insert_New_Customer)
     router.post('/customers/bulk', customerController.Bulk_Insert_Customers)
@@ -60,16 +62,16 @@ router.get('/city/:cityID', CityController.Get_City_By_ID)
 
 
 
-router.post('/orders', timeLimitMiddleware, OrderController.Save_Order_On_Insert)
+router.post('/orders', [timeLimitMiddleware, authMiddleware], OrderController.Save_Order_On_Insert)
 router.param('orderID', /^[0-9]+$/) // forcing the orderID parameter to be int
-router.get('/orders/:orderID', OrderController.Get_Order_By_ID)
-router.get('/orders/today', OrderController.List_Orders_Of_Today)
-router.get('/orders/from/:FROM/to/:TO', OrderController.List_Orders_From_To)
-router.put('/orders/:orderID/setStatus/:statusID', timeLimitMiddleware, OrderController.Change_Order_Status)
+router.get('/orders/:orderID', authMiddleware, OrderController.Get_Order_By_ID)
+router.put('/orders/:orderID/setStatus/:statusID', [timeLimitMiddleware, authMiddleware], OrderController.Change_Order_Status)
 if (process.env.NODE_ENV === 'server61') {
     router.get('/orders/oraread/:oraRead', OrderController.List_Orders_ByTIG_OraRead)
-    router.put('/orders/:orderID/set/oraread/:bit', timeLimitMiddleware, OrderController.Set_OracleRead_Flag)
-    router.delete('/orders/:orderID', OrderController.Delete_Order)
+    router.put('/orders/:orderID/set/oraread/:bit', [timeLimitMiddleware, authMiddleware], OrderController.Set_OracleRead_Flag)
+    router.delete('/orders/:orderID', authMiddleware, OrderController.Delete_Order)
+    router.get('/orders/today', authMiddleware, OrderController.List_Orders_Of_Today)
+    router.get('/orders/from/:FROM/to/:TO', authMiddleware, OrderController.List_Orders_From_To)
 }
 router.post('/orders/test', OrderController.test)
 
@@ -78,8 +80,8 @@ router.post('/orders/test', OrderController.test)
 router.get('/status', statusController.List_Status)
 
 
-router.get('/centers', centerController.List_All_Centers)
-router.get('/centers/:centerID', centerController.Get_Center_By_ID)
+router.get('/centers', authMiddleware, centerController.List_All_Centers)
+router.get('/centers/:centerID', authMiddleware, centerController.Get_Center_By_ID)
 if (process.env.NODE_ENV === 'server61') {
     router.post('/centers', timeLimitMiddleware, centerController.Insert_New_Center)
     router.put('/centers/:centerID', timeLimitMiddleware, centerController.Edit_Center)

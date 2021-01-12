@@ -12,10 +12,13 @@ const List_Category_Of_Products = async (req, res, next) => {
 
     const allCats = await cats.findAll({
       attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('Category_L1_ID')), 'Category_L1_ID'],
-        'Category_L1_Name']
+        'Category_L1_Name'],
+      where: {
+        CENTERID: req.user.CID
+      }
     });
     res.status(200).send(allCats)
-  } catch (err) {    
+  } catch (err) {
     next(err)
   }
 }
@@ -28,7 +31,11 @@ const List_Products = async (req, res, next) => {
   try {
     var productRepo = require('../../../models/domain/Product_Repository')(sequelize, DataTypes)
 
-    const allProducts = await productRepo.findAll();
+    const allProducts = await productRepo.findAll({
+      where: {
+        CENTERID: req.user.CID
+      }
+    });
     res.status(200).send(allProducts)
   } catch (err) {
     next(err)

@@ -8,7 +8,11 @@ const List_Cutomers = async (req, res, next) => {
     try {
         var customerModel = require('../../../models/domain/Customers')(sequelize, DataTypes)
 
-        const allCustomers = await customerModel.findAll();
+        const allCustomers = await customerModel.findAll({
+            where:{
+                CENTERID: req.user.CID
+            }
+        });
         res.status(200).send(allCustomers)
     } catch (err) {
         next(err)

@@ -6,7 +6,7 @@ const tokenHandler = require('../../../Utils/TokenHandler')
 // const moment = require('jalali-moment')
 
 
-const { Users } = require('../../../models/domain/init-models')(sequelize)
+const DB = require('../../../models/domain/init-models')(sequelize)
 
 
 
@@ -15,7 +15,7 @@ const sign_in = async (req, res, next) => {
     try {
         // validate user input
         // 400 Bad request
-        const result = await Users.findOne({
+        const result = await DB.Users.findOne({
             where: {
                 Username: req.body.Username
             }
@@ -31,10 +31,17 @@ const sign_in = async (req, res, next) => {
             throw new MyErrorHandler(403, 'Forbidden')
         }
 
-        const [token, refreshToken] = tokenHandler.Create_Tokens(result)
+        const [token, refreshToken] = await tokenHandler.Create_Tokens(result)
 
-        
-        //res.json({ token: 'JWT ' + token, refreshToken: refreshToken })
+        const logRecord = await DB.RefTokenLogs.create({        
+            UserID: result.UserID,
+            RefreshToken: refreshToken,
+            Valid: true
+        })
+
+        res.header('x-auth-token', token);
+        res.header('x-auth-refreshtoken', refreshToken);
+        //res.json({ token: 'JWT ' + token, refreshToken: refreshToken })        
         res.json({ token: token, refreshToken: refreshToken })
 
 
