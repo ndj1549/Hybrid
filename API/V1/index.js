@@ -51,6 +51,7 @@ if (process.env.NODE_ENV === 'server61') {
 
 
 router.post('/users/signin', userController.sign_in)
+router.post('/users/token', userController.ReNew_Token)
 
 
 

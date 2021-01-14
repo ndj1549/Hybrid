@@ -82,14 +82,15 @@
 var jwt = require('jsonwebtoken');
 
 var tokenBody = {
-    'ID': 'TIG', 
+    'ID': 'TIG',
     'CID': 'TIG',
     'PR': true,
 }
 
 
-var token = jwt.sign(tokenBody, 'shhhhh', {expiresIn: '10947d'});
+var token = jwt.sign(tokenBody, 'shhhhh', { expiresIn: '10947d' });
 console.log(token)
+console.log(token.length)
 console.log(Math.floor(Date.now() / 1000))
 
 
@@ -100,10 +101,59 @@ console.log(Math.floor(Date.now() / 1000))
 // var decoded = jwt.decode(token, {complete: true});
 // console.log(decoded.header);
 // console.log(decoded.payload)
-var decoded = jwt.decode(token);
-console.log(decoded)
-// console.log(Date.parse(decoded.iat) < Date.parse(decoded.exp))
-console.log(decoded.iat < decoded.exp)
+// var decoded = jwt.decode(token);
+// console.log(decoded)
+// // console.log(Date.parse(decoded.iat) < Date.parse(decoded.exp))
+// console.log(decoded.iat < decoded.exp)
 
-var str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0IjoibUZHV1N4TzJ1dGJ2ZkRET3RFblhhWUNUdFRaYldqU2YiLCJpYXQiOjE2MTAzNTMyODksImV4cCI6MTYxMDQzOTY4OX0.V-CncB76KBTaM3vXLogdUTA7KiJtJBUy8IdK1yi25Bg"
-console.log(str.length)
+// var str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0IjoibUZHV1N4TzJ1dGJ2ZkRET3RFblhhWUNUdFRaYldqU2YiLCJpYXQiOjE2MTAzNTMyODksImV4cCI6MTYxMDQzOTY4OX0.V-CncB76KBTaM3vXLogdUTA7KiJtJBUy8IdK1yi25Bg"
+// console.log(str.length)
+
+//--------------------------------------------------------
+//--------   Tracking Code generate
+
+var now = new Date();
+var start = new Date(now.getFullYear(), 0, 0);
+var diff = now - start;
+var oneDay = 1000 * 60 * 60 * 24;
+var DAY = Math.floor(diff / oneDay);
+console.log('Day of year: ' + DAY);
+// console.log(now.getFullYear())
+// console.log(now.getFullYear().toString().substring(2,4))
+const YEAR = now.getFullYear().toString().substring(2,4);
+
+//------- To convert day of the year back to date:
+function dateFromDay(year, day) {
+    var date = new Date(year, 0); // initialize a date in `year-01-01`
+    return new Date(date.setDate(day)); // add the number of days
+}
+
+console.log(dateFromDay(2010, 301)); // "Thu Oct 28 2010", today ;)
+console.log(dateFromDay(2010, 365)); // "Fri Dec 31 2010"
+//--------------------------------------------------------------------------------
+console.log('========================')
+
+TimeStr = 'ABCDEFGHIJKLMNPQRSTUVWYZ';
+console.log('char for hour: '+ TimeStr[parseInt(now.getHours())])
+const HourCharacter = TimeStr[parseInt(now.getHours())]
+
+const { v4: uuidv4 } = require('uuid');
+// [1,2,3,4,5,6,7,8,9,10].map(r => {
+//     console.log(uuidv4())
+// })
+
+Array(5).fill().map(r => {
+    let str = uuidv4()
+    // console.log(str)
+    console.log(str.substring(9, 13))    
+})
+
+
+const RANDOM_4 = uuidv4().substring(9, 13)
+const strBase = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ!@#$&*123456789";
+const MinuteCharacter = strBase[parseInt(now.getMinutes())]
+//Math.floor(Math.random() * 10) + 1;  // returns a random integer from 1 to 10 
+console.log(Math.floor(Math.random() * 63) ) 
+const RandomChar = strBase[Math.floor(Math.random() * 63) ]
+console.log(RandomChar)
+console.log(YEAR+'-'+DAY+'/'+HourCharacter+MinuteCharacter+RANDOM_4+RandomChar)

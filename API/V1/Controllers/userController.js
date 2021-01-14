@@ -27,20 +27,20 @@ const sign_in = async (req, res, next) => {
         }
 
         // Account Locked
-        if(! result.IsActive) {
+        if (!result.IsActive) {
             throw new MyErrorHandler(403, 'Forbidden')
         }
 
         const [token, refreshToken] = await tokenHandler.Create_Tokens(result)
 
-        const logRecord = await DB.RefTokenLogs.create({        
+        const logRecord = await DB.RefTokenLogs.create({
             UserID: result.UserID,
             RefreshToken: refreshToken,
             Valid: true
         })
 
-        res.header('x-auth-token', token);
-        res.header('x-auth-refreshtoken', refreshToken);
+        // res.header('x-auth-token', token);
+        // res.header('x-auth-refreshtoken', refreshToken);
         //res.json({ token: 'JWT ' + token, refreshToken: refreshToken })        
         res.json({ token: token, refreshToken: refreshToken })
 
@@ -90,6 +90,23 @@ const Reject_UserToken = async () => {
 }
 
 
+const ReNew_Token = async (req, res, next) => {
+    console.log(req.body.refreshToken)
+
+    try {
+        // const [token, refreshToken] = await tokenHandler.ReNew_AccessToken(req.body.accessToken, req.body.refreshToken)
+        const token = await tokenHandler.ReNew_AccessToken(req.body.accessToken, req.body.refreshToken)
+        res.json({ token: token, refreshToken: req.body.refreshToken })
+    } catch(err){
+        res.status(500).send(err)
+    } finally {
+        // res.set('x-auth-token', accToken)
+        // res.set('x-auth-refreshtoken', req.body.refreshToken)
+    }
+}
+
+
+
 module.exports = {
     sign_in,
     sign_up,
@@ -98,5 +115,6 @@ module.exports = {
     List_UserAccounts,
     Get_Account_By_UserID,
     Reject_UserToken,
-    myProfile
+    myProfile,
+    ReNew_Token
 }
