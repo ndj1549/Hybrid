@@ -44,6 +44,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.BOOLEAN,
       allowNull: true,
       defaultValue: false
+    },
+    TrackingCode: {
+      type: DataTypes.STRING(32),
+      allowNull: true
     }
   }, {
     sequelize,

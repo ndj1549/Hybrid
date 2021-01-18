@@ -13,6 +13,8 @@ const moment = require('jalali-moment')
 var { Orders, OrderDetails } = require('../../../models/domain/init-models').initModels(sequelize)
 var productModel = require('../../../models/domain/Product_Repository')(sequelize, DataTypes)
 const { Product_Repository } = require('../../../models/domain/init-models')(sequelize)
+const DB = require('../../../models/domain/init-models')(sequelize)
+
 
 const Save_Order_On_Insert = async (req, res, next) => {
 
@@ -130,13 +132,13 @@ const List_Orders_From_To = async (req, res, next) => {
     console.log(req.params.TO)
     // convert dates from persian to gregorian
     const m = moment();
-    const _from = moment.from(req.params.FROM, 'fa', 'YYYY-MM-DD').format() // 
+    const _from = moment.from(req.params.FROM, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD')
     var _to = 0;
     if (!req.params.TO) {
         console.log("you didn't provide TO date; we set it to today by default")
         _to = m.format('YYYY-MM-DD') // gregorian date
     } else {
-        _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').format()
+        _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD')
     }
 
     // console.log({ "from": _from, "to": _to })
@@ -258,7 +260,7 @@ const Delete_Order = async (req, res, next) => {
             throw new MyErrorHandler(404, 'Order Not Found')
         }
 
-        console.log(_order)
+        // console.log(_order)
 
         await _order.destroy({
             where: {
@@ -331,6 +333,89 @@ const test = async (req, res) => {
 
 }
 
+const Get_Order_Header = async (req, res, next) => {
+    try {
+        const _order = await DB.Orders.findOne({
+            where: {
+                OrderID: req.params.orderID
+            }
+        })
+
+        if(!_order){
+            throw new MyErrorHandler(404, 'Order Not Found')
+        }
+
+        res.status(200).send(_order)
+    } catch (err) {
+        next(err)
+    }
+}
+
+const List_Details_Of_Orders_Today = async (req, res, next) => {
+    const m = moment();
+    const currentDate = m.format('YYYY-MM-DD')
+    // console.log(currentDate)
+
+    try {
+        
+        const result = await DB.OrderDetails.findAll({
+            where: {
+                InsertTimestamp: {
+                    [Op.gte]: currentDate //m.add(1, 'day').format('YYYY-MM-DD')// gregorian date
+                }
+            }            
+        })
+
+        res.status(200).send(result)
+
+    } catch (err) {
+        next(err)
+    }
+}
+
+
+    const List_Details_Of_Orders_FROM_TO = async (req, res, next) => {
+        if (!req.params.FROM) {
+            res.status(400).send('From date is neccessary')
+        }
+    
+        // console.log(req.params.FROM)
+        // console.log(req.params.TO)
+        // convert dates from persian to gregorian
+        const m = moment();
+        const _from = moment.from(req.params.FROM, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD') // 
+        var _to = 0;
+        if (!req.params.TO) {
+            console.log("you didn't provide TO date; we set it to today by default")
+            _to = m.format('YYYY-MM-DD') // gregorian date
+        } else {
+            _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD')
+        }
+    
+        // console.log({ "from": _from, "to": _to })
+    
+    
+        try {            
+            const result = await DB.OrderDetails.findAll({
+                where: {
+                    InsertTimestamp: {
+                        [Op.and]: [
+                            { [Op.gte]: _from },
+                            { [Op.lte]: _to }
+                        ]
+                    }
+                }                
+            })
+    
+    
+            res.status(200).send(result)
+    
+        } catch (err) {
+            next(err)
+        }
+    }
+    
+
 module.exports = {
     Save_Order_On_Insert,
     // Save_Order_On_Edit,
@@ -340,7 +425,10 @@ module.exports = {
     List_Orders_ByTIG_OraRead,
     Change_Order_Status,
     // List_Orders_Made_By_UserID,
-    // Get_Details_Of_OrderID
+    // Get_Details_Of_OrderID,
+    List_Details_Of_Orders_Today,
+    List_Details_Of_Orders_FROM_TO,
+    Get_Order_Header,
     List_Orders_From_To,
     Change_Order_Status,
     // Modify_Order_Details_Confirm_ByTIG,

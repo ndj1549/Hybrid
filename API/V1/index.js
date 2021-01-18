@@ -15,6 +15,7 @@ const OrderController = require('./Controllers/orderController')
 const customerController = require('./Controllers/customerController')
 const centerController = require('./Controllers/centerController')
 const statusController = require('./Controllers/statusController')
+const { orderBy } = require("lodash")
 
 
 
@@ -67,6 +68,10 @@ if (process.env.NODE_ENV === 'server61') {
     router.get('/orders/oraread/:oraRead', OrderController.List_Orders_ByTIG_OraRead)
     router.put('/orders/:orderID/set/oraread/:bit', timeLimitMiddleware, OrderController.Set_OracleRead_Flag)
     router.delete('/orders/:orderID', OrderController.Delete_Order)
+    router.get('/orders/:orderID/header', OrderController.Get_Order_Header)
+    router.get('/orders/today/details', OrderController.List_Details_Of_Orders_Today)
+    router.get('/orders/from/:FROM/to/:TO/details', OrderController.List_Details_Of_Orders_FROM_TO)
+
 }
 router.post('/orders/test', OrderController.test)
 

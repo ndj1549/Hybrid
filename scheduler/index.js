@@ -12,7 +12,7 @@ schedule.scheduleJob('* * * * * *', function () {
 });
 
 
-schedule.scheduleJob('20 33 12 * * *', function () {
+schedule.scheduleJob('10 24 9 * * *', function () {
     // axios.get('http://localhost:5000/')
     //     .then(function (response) {
     //         // handle success

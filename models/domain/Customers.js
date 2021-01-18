@@ -43,7 +43,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     MandeEtebar: {
-      type: DataTypes.DECIMAL(19,4),
+      type: DataTypes.DOUBLE,
       allowNull: true
     }
   }, {

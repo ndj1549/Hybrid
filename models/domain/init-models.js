@@ -7,6 +7,7 @@ var _OrderStatus = require("./OrderStatus");
 var _Orders = require("./Orders");
 var _Ostan = require("./Ostan");
 var _Product_Repository = require("./Product_Repository");
+var _RefTokenLogs = require("./RefTokenLogs");
 var _Users = require("./Users");
 var _V_OstanCity = require("./V_OstanCity");
 
@@ -19,6 +20,7 @@ function initModels(sequelize) {
   var Orders = _Orders(sequelize, DataTypes);
   var Ostan = _Ostan(sequelize, DataTypes);
   var Product_Repository = _Product_Repository(sequelize, DataTypes);
+  var RefTokenLogs = _RefTokenLogs(sequelize, DataTypes);
   var Users = _Users(sequelize, DataTypes);
   var V_OstanCity = _V_OstanCity(sequelize, DataTypes);
 
@@ -40,6 +42,7 @@ function initModels(sequelize) {
     Orders,
     Ostan,
     Product_Repository,
+    RefTokenLogs,
     Users,
     V_OstanCity,
   };
