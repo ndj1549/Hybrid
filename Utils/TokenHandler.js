@@ -12,8 +12,8 @@ const DB = require('../models/domain/init-models')(sequelize)
 
 
 
-const jwtSECRET_4_AccessToken = config.get('jwtSECRET_AccessToken');
-const jwtSECRET_4_RefreshToken = config.get('jwtSECRET_RefreshToken');
+const jwtSECRET_4_AccessToken = config.get('jwtSECRET_AccessToken')
+const jwtSECRET_4_RefreshToken = config.get('jwtSECRET_RefreshToken')
 const ACCESS_TOKEN_LIFETIME = config.get('ACCESS_TOKEN_LIFETIME')
 
 

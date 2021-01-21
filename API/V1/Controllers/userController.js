@@ -42,8 +42,8 @@ const sign_in = async (req, res, next) => {
         // res.header('x-auth-token', token);
         // res.header('x-auth-refreshtoken', refreshToken);
         //res.json({ token: 'JWT ' + token, refreshToken: refreshToken })        
-        res.json({ token: token, refreshToken: refreshToken })
-
+        
+        res.json({ ACCESS_TOKEN: token, REFRESH_TOKEN: refreshToken })
 
     } catch (err) {
         next(err)
@@ -96,7 +96,7 @@ const ReNew_Token = async (req, res, next) => {
     try {
         // const [token, refreshToken] = await tokenHandler.ReNew_AccessToken(req.body.accessToken, req.body.refreshToken)
         const token = await tokenHandler.ReNew_AccessToken(req.body.accessToken, req.body.refreshToken)
-        res.json({ token: token, refreshToken: req.body.refreshToken })
+        res.json({ ACCESS_TOKEN: token, REFRESH_TOKEN: req.body.refreshToken })
     } catch(err){
         res.status(500).send(err)
     } finally {

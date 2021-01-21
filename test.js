@@ -112,48 +112,126 @@ console.log(Math.floor(Date.now() / 1000))
 //--------------------------------------------------------
 //--------   Tracking Code generate
 
-var now = new Date();
-var start = new Date(now.getFullYear(), 0, 0);
-var diff = now - start;
-var oneDay = 1000 * 60 * 60 * 24;
-var DAY = Math.floor(diff / oneDay);
-console.log('Day of year: ' + DAY);
-// console.log(now.getFullYear())
-// console.log(now.getFullYear().toString().substring(2,4))
-const YEAR = now.getFullYear().toString().substring(2,4);
+// var now = new Date();
+// var start = new Date(now.getFullYear(), 0, 0);
+// var diff = now - start;
+// var oneDay = 1000 * 60 * 60 * 24;
+// var DAY = Math.floor(diff / oneDay);
+// console.log('Day of year: ' + DAY);
+// // console.log(now.getFullYear())
+// // console.log(now.getFullYear().toString().substring(2,4))
+// const YEAR = now.getFullYear().toString().substring(2,4);
 
-//------- To convert day of the year back to date:
-function dateFromDay(year, day) {
-    var date = new Date(year, 0); // initialize a date in `year-01-01`
-    return new Date(date.setDate(day)); // add the number of days
-}
+// //------- To convert day of the year back to date:
+// function dateFromDay(year, day) {
+//     var date = new Date(year, 0); // initialize a date in `year-01-01`
+//     return new Date(date.setDate(day)); // add the number of days
+// }
 
-console.log(dateFromDay(2010, 301)); // "Thu Oct 28 2010", today ;)
-console.log(dateFromDay(2010, 365)); // "Fri Dec 31 2010"
-//--------------------------------------------------------------------------------
-console.log('========================')
+// console.log(dateFromDay(2010, 301)); // "Thu Oct 28 2010", today ;)
+// console.log(dateFromDay(2010, 365)); // "Fri Dec 31 2010"
+// //--------------------------------------------------------------------------------
+// console.log('========================')
 
-TimeStr = 'ABCDEFGHIJKLMNPQRSTUVWYZ';
-console.log('char for hour: '+ TimeStr[parseInt(now.getHours())])
-const HourCharacter = TimeStr[parseInt(now.getHours())]
+// TimeStr = 'ABCDEFGHIJKLMNPQRSTUVWYZ';
+// console.log('char for hour: '+ TimeStr[parseInt(now.getHours())])
+// const HourCharacter = TimeStr[parseInt(now.getHours())]
 
-const { v4: uuidv4 } = require('uuid');
-// [1,2,3,4,5,6,7,8,9,10].map(r => {
-//     console.log(uuidv4())
+// const { v4: uuidv4 } = require('uuid');
+// // [1,2,3,4,5,6,7,8,9,10].map(r => {
+// //     console.log(uuidv4())
+// // })
+
+// Array(5).fill().map(r => {
+//     let str = uuidv4()
+//     // console.log(str)
+//     console.log(str.substring(9, 13))    
 // })
 
-Array(5).fill().map(r => {
-    let str = uuidv4()
-    // console.log(str)
-    console.log(str.substring(9, 13))    
-})
+
+// const RANDOM_4 = uuidv4().substring(9, 13)
+// const strBase = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ!@#$&*123456789";
+// const MinuteCharacter = strBase[parseInt(now.getMinutes())]
+// //Math.floor(Math.random() * 10) + 1;  // returns a random integer from 1 to 10 
+// console.log(Math.floor(Math.random() * 63) ) 
+// const RandomChar = strBase[Math.floor(Math.random() * 63) ]
+// console.log(RandomChar)
+// console.log(YEAR+'-'+DAY+'/'+HourCharacter+MinuteCharacter+RANDOM_4+RandomChar)
 
 
-const RANDOM_4 = uuidv4().substring(9, 13)
-const strBase = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ!@#$&*123456789";
-const MinuteCharacter = strBase[parseInt(now.getMinutes())]
-//Math.floor(Math.random() * 10) + 1;  // returns a random integer from 1 to 10 
-console.log(Math.floor(Math.random() * 63) ) 
-const RandomChar = strBase[Math.floor(Math.random() * 63) ]
-console.log(RandomChar)
-console.log(YEAR+'-'+DAY+'/'+HourCharacter+MinuteCharacter+RANDOM_4+RandomChar)
+// const TrackingCode = require('./Services/TrackingCode')
+
+// console.log(TrackingCode.generate());
+
+// Array(200).fill().map(r => {
+//     console.log(TrackingCode.generate())
+// })
+
+
+const _ = require('lodash');
+const moment = require('moment')
+const { SODA_COLL_MAP_MODE } = require('oracledb');
+const { Sequelize, DataTypes, Op, ValidationError } = require("sequelize");
+const RefTokenLogs = require('./models/domain/RefTokenLogs');
+const { sequelize } = require('./startup/db')
+
+const DB = require('./models/domain/init-models')(sequelize)
+
+var list = []
+const main = async () => {
+    const result = await DB.RefTokenLogs.findAll({})
+    list = _.map(result, o => _.omit(o.dataValues, ['RefreshToken']));
+    console.log(result[0].dataValues.LastUpdated)
+    console.log(list)
+
+
+    // var curr = new Date();
+    // var yesterday = new Date(curr).setHours(curr.getHours() - 1)
+    // //yesterday.setDay(curr.getDay() - 1)
+    // var yesterday = Date.parse(yesterday).setMonth(2)
+
+    // // var yesterday = d.setHours(d.getHours() - 1 ); 
+    // // yesterday = new Date(yesterday).setDay(new Date(yesterday).getDay()-1);
+    // console.log(yesterday)
+    // // var date = new Date(yesterday * 1000)
+    // // console.log(date.getHours())
+    // console.log(new Date(yesterday).toTimeString())
+    // console.log(new Date(yesterday).toLocaleTimeString())
+    // console.log(new Date(yesterday).toDateString())
+
+
+    // moment().subtract(1, 'days')
+    var a = moment();
+    var yesterday = a.subtract({ hours: 25 });
+    console.log(yesterday)
+    console.log(new Date() > yesterday)
+
+    list = _.map(list, rec => rec["DEL"] = (rec.LastUpdated < yesterday))
+    console.log(list)
+
+    var r = await DB.RefTokenLogs.findAll({
+        where: {
+            LastUpdated: {
+                [Op.lte]: yesterday
+            }
+        }
+    })
+
+    r = _.map(r, rec => rec.dataValues)
+    console.log(r)
+
+    
+
+    // const diffTime = Math.abs(date2 - date1);
+    // const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));    
+}
+
+
+const f = async () => {
+    await main()
+}
+
+f()
+
+
+

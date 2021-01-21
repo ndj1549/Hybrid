@@ -15,7 +15,7 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.BOOLEAN,
       allowNull: true
     },
-    LastUpdate: {
+    LastUpdated: {
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: Sequelize.fn('getdate')

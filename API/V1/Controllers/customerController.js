@@ -10,7 +10,7 @@ const List_Cutomers = async (req, res, next) => {
 
         const allCustomers = await customerModel.findAll({
             where:{
-                CENTERID: req.user.CID
+                CenterID: req.user.CID
             }
         });
         res.status(200).send(allCustomers)

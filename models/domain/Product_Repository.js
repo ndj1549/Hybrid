@@ -17,7 +17,8 @@ module.exports = function(sequelize, DataTypes) {
     },
     MOJUDI: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      defaultValue: 0
     },
     VAHED: {
       type: DataTypes.STRING(50),
@@ -29,7 +30,7 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: 1000
     },
     PRICE: {
-      type: DataTypes.DECIMAL(19,4),
+      type: DataTypes.DOUBLE,
       allowNull: true
     },
     DISCOUNT: {

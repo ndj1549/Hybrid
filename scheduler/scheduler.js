@@ -1,7 +1,8 @@
-const { Sequelize, DataTypes } = require("sequelize");
+const { Sequelize, DataTypes, Op } = require("sequelize");
 const { sequelize } = require('../startup/db')
 const config = require('config')
 const axios = require('axios')
+var moment = require('moment')
 const oracleDB = require('oracledb')
 const _ = require('lodash')
 
@@ -11,6 +12,25 @@ const dbConfig = {
     connectString: config.get('connStr.oracle.db')
 };
 
+
+const DB = require('../models/domain/init-models')(sequelize)
+
+const DELETE_Expired_Token_Logs = async () => {
+    try {
+        var a = moment();
+        var yesterday = a.subtract({ hours: 25 });
+
+        await DB.RefTokenLogs.destroy({
+            where: {
+                LastUpdated: {
+                    [Op.lte]: yesterday
+                }
+            }
+        })
+    } catch(err) {
+        console.log(err)
+    }
+}
 
 
 const SYNC_SQL_WITH_ORA_Centers = async () => {
@@ -35,12 +55,12 @@ const SYNC_SQL_WITH_ORA_Centers = async () => {
             CENTERNAME: 'CenterName'
         };
 
-        var newList = []        
+        var newList = []
 
         list.rows.map(item => {
             newList.push(
                 _.mapKeys(item, (value, key) => {
-                    return keyMap[key]                   
+                    return keyMap[key]
                 })
             )
         });
@@ -82,7 +102,7 @@ const SYNC_SQL_WITH_ORA_Customers = async () => {
     try {
         connection = await oracleDB.getConnection(dbConfig);
 
-        const list = await connection.execute("select * from V_HBRD_CUSTOMER", [], { outFormat: oracleDB.OUT_FORMAT_OBJECT });
+        const list = await connection.execute("select * from V_HBRD_CUSTOMER  where AGENT_CODE is not null", [], { outFormat: oracleDB.OUT_FORMAT_OBJECT });
 
         if (list.rows.length === 0) {
             throw new Error('No rows returned from V_HBRD_CENTER')
@@ -94,17 +114,18 @@ const SYNC_SQL_WITH_ORA_Customers = async () => {
 
         var keyMap = {
             CUSTOMER_CODE: 'CustomerID_TFOra',
-            // AGENT_CODE: 'CenterID',
+            AGENT_CODE: 'CenterID',
+            CUSTOMER_NAME: 'CustomerName',
             CUSTOMER_CREDIT: 'MandeEtebar',
-            //...
+            //...            
         };
 
-        var newList = []        
+        var newList = []
 
         list.rows.map(item => {
             newList.push(
                 _.mapKeys(item, (value, key) => {
-                    return keyMap[key]                   
+                    return keyMap[key]
                 })
             )
         });
@@ -163,12 +184,12 @@ const SYNC_SQL_WITH_ORA_CustomerMandeEtebar = async () => {
             CUSTOMER_CREDIT: 'MandeEtebar'
         };
 
-        var newList = []        
+        var newList = []
 
         list.rows.map(item => {
             newList.push(
                 _.mapKeys(item, (value, key) => {
-                    return keyMap[key]                   
+                    return keyMap[key]
                 })
             )
         });
@@ -293,7 +314,8 @@ module.exports = {
     SYNC_SQL_WITH_ORA_Products,
     SYNC_SQL_WITH_ORA_Centers,
     SYNC_SQL_WITH_ORA_Customers,
-    SYNC_SQL_WITH_ORA_CustomerMandeEtebar    
+    SYNC_SQL_WITH_ORA_CustomerMandeEtebar,
+    DELETE_Expired_Token_Logs
 }
 
 

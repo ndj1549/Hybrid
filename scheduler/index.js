@@ -1,8 +1,27 @@
 
 var schedule = require('node-schedule')
+
+
+
 const { SYNC_SQL_WITH_ORA_Products,
-        SYNC_SQL_WITH_ORA_Centers,
-        SYNC_SQL_WITH_ORA_CustomerMandeEtebar } = require('./scheduler')
+    SYNC_SQL_WITH_ORA_Customers,
+    SYNC_SQL_WITH_ORA_Centers,
+    SYNC_SQL_WITH_ORA_CustomerMandeEtebar,
+    DELETE_Expired_Token_Logs } = require('./scheduler')
+
+
+
+var rule = new schedule.RecurrenceRule();
+rule.hour = 2; // 6
+rule.minute = 0;
+schedule.scheduleJob(rule, function () {
+
+    DELETE_Expired_Token_Logs()
+
+});
+
+
+
 
 
 
@@ -30,20 +49,20 @@ schedule.scheduleJob('20 33 12 * * *', function () {
 });
 
 
-schedule.scheduleJob('10 14 10 * * *', function() {
+schedule.scheduleJob('10 14 10 * * *', function () {
     SYNC_SQL_WITH_ORA_Centers()
 })
 
 
 
-schedule.scheduleJob('0 31 14 * * *', function() {
+schedule.scheduleJob('0 31 14 * * *', function () {
     SYNC_SQL_WITH_ORA_CustomerMandeEtebar()
 })
 
 
-// schedule.scheduleJob('* * * * * *', function() {
-//     SYNC_SQL_WITH_ORA_Customers()
-// })
+schedule.scheduleJob('40 54 14 * * *', function() {
+    SYNC_SQL_WITH_ORA_Customers()
+})
 
 
 

@@ -51,7 +51,10 @@ const List_Products_By_Category = async (req, res, next) => {
 
     const allProducts = await productRepo.findAll({
       where: {
-        Category_L1_ID: req.params.catID
+        [Op.and]: [
+          { Category_L1_ID: req.params.catID },
+          { CENTERID: req.user.CID }
+        ]
       }
     });
     res.status(200).send(allProducts)
@@ -74,7 +77,10 @@ const List_Products_By_Category_Paginated = async (req, res, next) => {
 
       await productRepo.findAndCountAll({
         where: {
-          Category_L1_ID: req.params.catID
+          [Op.and]: [
+            { Category_L1_ID: req.params.catID },
+            { CENTERID: req.user.CID }
+          ]
         },
         order: [],
         limit: Count_Per_page,

@@ -39,6 +39,11 @@ module.exports = function(sequelize, DataTypes) {
     PackgID: {
       type: DataTypes.SMALLINT,
       allowNull: true
+    },
+    InsertTimestamp: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: Sequelize.fn('getdate')
     }
   }, {
     sequelize,

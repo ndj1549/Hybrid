@@ -21,7 +21,8 @@ module.exports = async (req, res, next) => {
             return; 
         }
         const decoded = jwt.verify(token, config.get('jwtSECRET_AccessToken'));
-        // console.log('TOKEN DECODED: ' + JSON.stringify(decoded));
+        console.log('TOKEN DECODED: ' + JSON.stringify(decoded));
+        // {"ID":2,"CID":760100,"PR":false,"iat":1610960158,"exp":1610960218}
         req.user = decoded; // this decoded is the payload object embedded in the token upon creation
         
         next()

@@ -2,6 +2,7 @@
 const { MyErrorHandler } = require('../../../Utils/error')
 const { Sequelize, DataTypes, Op, ValidationError } = require("sequelize")
 const { sequelize } = require('../../../startup/db')
+const TrackingCode = require('../../../Services/TrackingCode')
 const _ = require('lodash')
 const moment = require('jalali-moment')
 
@@ -26,6 +27,7 @@ const Save_Order_On_Insert = async (req, res, next) => {
 
         let order_header = _.pick(req.body, ['CustomerID_TFOra', 'UserID', 'ShippedDate', 'ShipCity', 'ShipAddress', 'OrderStatusID', 'OracleRead'])
 
+        order_header['TrackingCode'] = TrackingCode.generate()
         const newOrder = await Orders.create(order_header, { transaction: tran1 });
         //console.log(newOrder.dataValues)
         var list = []
@@ -48,22 +50,7 @@ const Save_Order_On_Insert = async (req, res, next) => {
 
         await OrderDetails.bulkCreate(list, { transaction: tran1 });
 
-
-
-        list.forEach(rec => {
-            productModel.increment('MOJUDI', {
-                by: Number(rec.Quantity) * -1,
-                where: {
-                    [Op.and]: [
-                        { PRODUCTIDORA: Number(req.params.productID) },
-                        { CENTERID: Number(req.params.centerID) },
-                    ]
-                },
-                transaction: tran1
-            })
-        })
-
-
+        
         // update mojudi anbar        
         var listPromises = []
         list.forEach((rec) => {
@@ -73,7 +60,7 @@ const Save_Order_On_Insert = async (req, res, next) => {
                 where: {
                     [Op.and]: [
                         { PRODUCTIDORA: Number(rec.ProductID) },
-                        { CENTERID: Number(req.user.centerID) },// set through Auth middleware
+                        { CENTERID: Number(req.user.CID) },// set through Auth middleware
                     ]
                 },
                 transaction: tran1
