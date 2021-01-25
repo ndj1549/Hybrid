@@ -44,6 +44,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: Sequelize.fn('getdate')
+    },
+    PackSize: {
+      type: DataTypes.SMALLINT,
+      allowNull: true
     }
   }, {
     sequelize,

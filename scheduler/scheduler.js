@@ -27,6 +27,8 @@ const DELETE_Expired_Token_Logs = async () => {
                 }
             }
         })
+
+        console.log('Old Refresh Tokens Deleted succussfully !')
     } catch(err) {
         console.log(err)
     }

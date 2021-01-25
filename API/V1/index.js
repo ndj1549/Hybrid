@@ -52,6 +52,7 @@ if (process.env.NODE_ENV === 'server61') {
 
 router.post('/users/signin', userController.sign_in)
 router.post('/users/token', userController.ReNew_Token)
+router.get('/users/me', authMiddleware, userController.Me)
 
 
 
@@ -74,7 +75,7 @@ if (process.env.NODE_ENV === 'server61') {
     router.get('/orders/today', authMiddleware, OrderController.List_Orders_Of_Today)
     router.get('/orders/from/:FROM/to/:TO', authMiddleware, OrderController.List_Orders_From_To)
 }
-router.post('/orders/test', OrderController.test)
+// router.post('/orders/test', OrderController.test)
 
 
 

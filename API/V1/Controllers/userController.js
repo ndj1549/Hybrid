@@ -17,11 +17,11 @@ const sign_in = async (req, res, next) => {
         // 400 Bad request
         const result = await DB.Users.findOne({
             where: {
-                Username: req.body.Username
+                Username: req.body.USERNAME
             }
         })
 
-        if (!result || result.Password !== req.body.Password) {
+        if (!result || result.Password !== req.body.PASSWORD) {
             //throw new MyErrorHandler(404, 'User Not Found')
             throw new MyErrorHandler(400, 'Invalid User/Pass')
         }
@@ -43,7 +43,27 @@ const sign_in = async (req, res, next) => {
         // res.header('x-auth-refreshtoken', refreshToken);
         //res.json({ token: 'JWT ' + token, refreshToken: refreshToken })        
         
-        res.json({ ACCESS_TOKEN: token, REFRESH_TOKEN: refreshToken })
+        res.json({ ACCESS_TOKEN: token, REFRESH_TOKEN: refreshToken, USERNAME:  result.LastName})
+
+    } catch (err) {
+        next(err)
+    }
+}
+
+const Me = async (req, res, next) => {
+    try{
+        const result = await DB.V_UserProfile.findOne({
+            where: {
+                UserID: req.user.ID
+            }
+        })
+
+        if (!result ) {
+            //throw new MyErrorHandler(404, 'User Not Found')
+            throw new MyErrorHandler(404, 'User Not Found')
+        }
+
+        res.status(200).send(result)
 
     } catch (err) {
         next(err)
@@ -107,11 +127,19 @@ const ReNew_Token = async (req, res, next) => {
 
 
 
+
+const ChangePassword = async () => {
+
+}
+
+
 module.exports = {
     sign_in,
     sign_up,
+    Me,
     Toggle_Account_Enable,
     Edit_Account,
+    ChangePassword,
     List_UserAccounts,
     Get_Account_By_UserID,
     Reject_UserToken,
