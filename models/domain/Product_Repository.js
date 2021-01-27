@@ -68,6 +68,21 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.FLOAT,
       allowNull: true
     },
+    TAX: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
+    },
+    AFZOODE: {
+      type: DataTypes.TINYINT,
+      allowNull: true,
+      defaultValue: 0
+    },
+    AVAREZ: {
+      type: DataTypes.TINYINT,
+      allowNull: true,
+      defaultValue: 0
+    },
     LASTUPDATE: {
       type: DataTypes.DATE,
       allowNull: true,

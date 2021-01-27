@@ -30,7 +30,7 @@ const List_Category_Of_Products = async (req, res, next) => {
 
 const List_Products = async (req, res, next) => {
   try {
-    
+
 
     const allProducts = await DB.Product_Repository.findAll({
       where: {
@@ -51,7 +51,7 @@ const List_Products = async (req, res, next) => {
 
 const List_Products_By_Category = async (req, res, next) => {
   try {
-    
+
 
     const allProducts = await DB.Product_Repository.findAll({
       where: {
@@ -79,7 +79,7 @@ const List_Products_By_Category_Paginated = async (req, res, next) => {
     if (!page) {
       List_Products_By_Category(req, res, next)
     } else {
-      
+
 
       await DB.Product_Repository.findAndCountAll({
         where: {
@@ -92,8 +92,8 @@ const List_Products_By_Category_Paginated = async (req, res, next) => {
         limit: Count_Per_page,
         offset: Count_Per_page * (page - 1),
       }).then(function (result) {
-        let list = result.map(rec => ({ ...rec.dataValues, MOJUDI: Math.floor((rec.MOJUDI / rec.PACKAGEQUANTITY)) }));
-        res.status(200).send(list);
+        let list = result.rows.map(rec => ({ ...rec.dataValues, MOJUDI: Math.floor((rec.MOJUDI / rec.PACKAGEQUANTITY)) }));
+        res.status(200).json({ count: result.count, rows: list });
       });
     }
 
@@ -127,7 +127,7 @@ const Bulk_Insert_Products = async (req, res, next) => {
 
   try {
     tran1 = await sequelize.transaction();
-    
+
 
 
     await DB.Product_Repository.destroy({ where: {}, transaction: tran1 });
@@ -147,7 +147,7 @@ const Bulk_Insert_Products = async (req, res, next) => {
 
 const Increment_Product_Mojudi = async (req, res, next) => {
 
-  try {    
+  try {
     await DB.Product_Repository.increment('MOJUDI', {
       by: Number(req.params.input),
       where: {

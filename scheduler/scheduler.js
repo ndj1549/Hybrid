@@ -13,6 +13,9 @@ const dbConfig = {
 };
 
 
+const BASE_ADDRESS = 'http://localhost:5000/api/v1';
+
+
 const DB = require('../models/domain/init-models')(sequelize)
 
 const DELETE_Expired_Token_Logs = async () => {
@@ -72,7 +75,7 @@ const SYNC_SQL_WITH_ORA_Centers = async () => {
 
         let result = await axios({
             method: 'post',
-            url: 'http://localhost:5000/api/v1/centers/bulk',
+            url: `${BASE_ADDRESS}/centers/bulk`,
             data: newList,
             timeout: 500000, // 5 minutes
             //headers: { 'X-Custom-Header': 'foobar' }
@@ -137,7 +140,7 @@ const SYNC_SQL_WITH_ORA_Customers = async () => {
 
         let result = await axios({
             method: 'post',
-            url: 'http://localhost:5000/api/v1/customers/bulk',
+            url: `${BASE_ADDRESS}/customers/bulk`,
             data: newList,
             timeout: 500000, // 5 minutes
             //headers: { 'X-Custom-Header': 'foobar' }
@@ -201,7 +204,7 @@ const SYNC_SQL_WITH_ORA_CustomerMandeEtebar = async () => {
 
         let result = await axios({
             method: 'put',
-            url: 'http://localhost:5000/api/v1/customers/bulk',
+            url: `${BASE_ADDRESS}/customers/bulk`,
             data: newList,
             timeout: 500000, // 5 minutes
             //headers: { 'X-Custom-Header': 'foobar' }
@@ -244,7 +247,10 @@ const SYNC_SQL_WITH_ORA_Products = async () => {
                                                    PACK_ID AS PackageIDOra,\
                                                    PACK_NAME AS PackageName,\
                                                    PACK_VALUE AS PackageQuantity,\
-                                                   PACK_WEIGHT AS PackageWeight\
+                                                   PACK_WEIGHT AS PackageWeight, \
+                                                   TAX, \
+                                                   AFZOODE, \
+                                                   AVAREZ \
                                                    from V_HBRD_STUFF_DETAIL", [], { outFormat: oracleDB.OUT_FORMAT_OBJECT });
 
         if (list.rows.length === 0) {
@@ -283,7 +289,7 @@ const SYNC_SQL_WITH_ORA_Products = async () => {
 
         let result = await axios({
             method: 'post',
-            url: 'http://192.168.87.61:5000/api/v1/products/bulk',
+            url: `${BASE_ADDRESS}/products/bulk`,
             data: list.rows,
             timeout: 500000, // 5 minutes
             //headers: { 'X-Custom-Header': 'foobar' }

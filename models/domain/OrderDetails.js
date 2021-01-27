@@ -28,6 +28,14 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true,
       defaultValue: 0
     },
+    PackSize: {
+      type: DataTypes.SMALLINT,
+      allowNull: true
+    },
+    PackgID: {
+      type: DataTypes.SMALLINT,
+      allowNull: true
+    },
     Discount: {
       type: DataTypes.REAL,
       allowNull: true
@@ -36,18 +44,26 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.FLOAT,
       allowNull: true
     },
-    PackgID: {
-      type: DataTypes.SMALLINT,
+    Price_SingleItem: {
+      type: DataTypes.DOUBLE,
+      allowNull: true
+    },
+    TotalPrice_AfterTax: {
+      type: DataTypes.DOUBLE,
+      allowNull: true
+    },
+    Tax: {
+      type: DataTypes.TINYINT,
+      allowNull: true
+    },
+    Avarez: {
+      type: DataTypes.TINYINT,
       allowNull: true
     },
     InsertTimestamp: {
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: Sequelize.fn('getdate')
-    },
-    PackSize: {
-      type: DataTypes.SMALLINT,
-      allowNull: true
     }
   }, {
     sequelize,
