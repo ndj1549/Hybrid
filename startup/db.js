@@ -21,7 +21,8 @@ const DBconfig = {
 const sequelize = new Sequelize(DBconfig.database, DBconfig.user, DBconfig.password, {
     host: DBconfig.server,
     port: config.get("connStr.sql").port,
-    dialect: config.get("connStr.sql").dialect
+    dialect: config.get("connStr.sql").dialect,
+    omitNull: true
   });
 
 

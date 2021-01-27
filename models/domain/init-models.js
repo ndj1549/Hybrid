@@ -9,7 +9,6 @@ var _Ostan = require("./Ostan");
 var _Product_Repository = require("./Product_Repository");
 var _RefTokenLogs = require("./RefTokenLogs");
 var _Users = require("./Users");
-var _V_OstanCity = require("./V_OstanCity");
 
 function initModels(sequelize) {
   var Centers = _Centers(sequelize, DataTypes);
@@ -22,7 +21,6 @@ function initModels(sequelize) {
   var Product_Repository = _Product_Repository(sequelize, DataTypes);
   var RefTokenLogs = _RefTokenLogs(sequelize, DataTypes);
   var Users = _Users(sequelize, DataTypes);
-  var V_OstanCity = _V_OstanCity(sequelize, DataTypes);
 
   City.belongsTo(Ostan, { foreignKey: "OstanID_Ora"});
   Ostan.hasMany(City, { foreignKey: "OstanID_Ora"});
@@ -44,7 +42,6 @@ function initModels(sequelize) {
     Product_Repository,
     RefTokenLogs,
     Users,
-    V_OstanCity,
   };
 }
 module.exports = initModels;

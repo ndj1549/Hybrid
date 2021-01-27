@@ -31,7 +31,8 @@ module.exports = function(sequelize, DataTypes) {
     },
     PRICE: {
       type: DataTypes.DOUBLE,
-      allowNull: true
+      allowNull: true,
+      defaultValue: 0
     },
     DISCOUNT: {
       type: DataTypes.FLOAT,
@@ -66,6 +67,21 @@ module.exports = function(sequelize, DataTypes) {
     PACKAGEWEIGHT: {
       type: DataTypes.FLOAT,
       allowNull: true
+    },
+    TAX: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false
+    },
+    AFZOODE: {
+      type: DataTypes.TINYINT,
+      allowNull: true,
+      defaultValue: 0
+    },
+    AVAREZ: {
+      type: DataTypes.TINYINT,
+      allowNull: true,
+      defaultValue: 0
     },
     LASTUPDATE: {
       type: DataTypes.DATE,

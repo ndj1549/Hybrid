@@ -1,7 +1,8 @@
-const { Sequelize, DataTypes } = require("sequelize");
+const { Sequelize, DataTypes, Op } = require("sequelize");
 const { sequelize } = require('../startup/db')
 const config = require('config')
 const axios = require('axios')
+var moment = require('moment')
 const oracleDB = require('oracledb')
 const _ = require('lodash')
 
@@ -11,6 +12,30 @@ const dbConfig = {
     connectString: config.get('connStr.oracle.db')
 };
 
+
+const BASE_ADDRESS = 'http://localhost:5000/api/v1';
+
+
+const DB = require('../models/domain/init-models')(sequelize)
+
+const DELETE_Expired_Token_Logs = async () => {
+    try {
+        var a = moment();
+        var yesterday = a.subtract({ hours: 25 });
+
+        await DB.RefTokenLogs.destroy({
+            where: {
+                LastUpdated: {
+                    [Op.lte]: yesterday
+                }
+            }
+        })
+
+        console.log('Old Refresh Tokens Deleted succussfully !')
+    } catch(err) {
+        console.log(err)
+    }
+}
 
 
 const SYNC_SQL_WITH_ORA_Centers = async () => {
@@ -35,12 +60,12 @@ const SYNC_SQL_WITH_ORA_Centers = async () => {
             CENTERNAME: 'CenterName'
         };
 
-        var newList = []        
+        var newList = []
 
         list.rows.map(item => {
             newList.push(
                 _.mapKeys(item, (value, key) => {
-                    return keyMap[key]                   
+                    return keyMap[key]
                 })
             )
         });
@@ -50,7 +75,7 @@ const SYNC_SQL_WITH_ORA_Centers = async () => {
 
         let result = await axios({
             method: 'post',
-            url: 'http://localhost:5000/api/v1/centers/bulk',
+            url: `${BASE_ADDRESS}/centers/bulk`,
             data: newList,
             timeout: 500000, // 5 minutes
             //headers: { 'X-Custom-Header': 'foobar' }
@@ -82,7 +107,7 @@ const SYNC_SQL_WITH_ORA_Customers = async () => {
     try {
         connection = await oracleDB.getConnection(dbConfig);
 
-        const list = await connection.execute("select * from V_HBRD_CUSTOMER", [], { outFormat: oracleDB.OUT_FORMAT_OBJECT });
+        const list = await connection.execute("select * from V_HBRD_CUSTOMER  where AGENT_CODE is not null", [], { outFormat: oracleDB.OUT_FORMAT_OBJECT });
 
         if (list.rows.length === 0) {
             throw new Error('No rows returned from V_HBRD_CENTER')
@@ -94,17 +119,18 @@ const SYNC_SQL_WITH_ORA_Customers = async () => {
 
         var keyMap = {
             CUSTOMER_CODE: 'CustomerID_TFOra',
-            // AGENT_CODE: 'CenterID',
+            AGENT_CODE: 'CenterID',
+            CUSTOMER_NAME: 'CustomerName',
             CUSTOMER_CREDIT: 'MandeEtebar',
-            //...
+            //...            
         };
 
-        var newList = []        
+        var newList = []
 
         list.rows.map(item => {
             newList.push(
                 _.mapKeys(item, (value, key) => {
-                    return keyMap[key]                   
+                    return keyMap[key]
                 })
             )
         });
@@ -114,7 +140,7 @@ const SYNC_SQL_WITH_ORA_Customers = async () => {
 
         let result = await axios({
             method: 'post',
-            url: 'http://localhost:5000/api/v1/customers/bulk',
+            url: `${BASE_ADDRESS}/customers/bulk`,
             data: newList,
             timeout: 500000, // 5 minutes
             //headers: { 'X-Custom-Header': 'foobar' }
@@ -163,12 +189,12 @@ const SYNC_SQL_WITH_ORA_CustomerMandeEtebar = async () => {
             CUSTOMER_CREDIT: 'MandeEtebar'
         };
 
-        var newList = []        
+        var newList = []
 
         list.rows.map(item => {
             newList.push(
                 _.mapKeys(item, (value, key) => {
-                    return keyMap[key]                   
+                    return keyMap[key]
                 })
             )
         });
@@ -178,7 +204,7 @@ const SYNC_SQL_WITH_ORA_CustomerMandeEtebar = async () => {
 
         let result = await axios({
             method: 'put',
-            url: 'http://localhost:5000/api/v1/customers/bulk',
+            url: `${BASE_ADDRESS}/customers/bulk`,
             data: newList,
             timeout: 500000, // 5 minutes
             //headers: { 'X-Custom-Header': 'foobar' }
@@ -221,7 +247,10 @@ const SYNC_SQL_WITH_ORA_Products = async () => {
                                                    PACK_ID AS PackageIDOra,\
                                                    PACK_NAME AS PackageName,\
                                                    PACK_VALUE AS PackageQuantity,\
-                                                   PACK_WEIGHT AS PackageWeight\
+                                                   PACK_WEIGHT AS PackageWeight, \
+                                                   TAX, \
+                                                   AFZOODE, \
+                                                   AVAREZ \
                                                    from V_HBRD_STUFF_DETAIL", [], { outFormat: oracleDB.OUT_FORMAT_OBJECT });
 
         if (list.rows.length === 0) {
@@ -260,7 +289,7 @@ const SYNC_SQL_WITH_ORA_Products = async () => {
 
         let result = await axios({
             method: 'post',
-            url: 'http://192.168.87.61:5000/api/v1/products/bulk',
+            url: `${BASE_ADDRESS}/products/bulk`,
             data: list.rows,
             timeout: 500000, // 5 minutes
             //headers: { 'X-Custom-Header': 'foobar' }
@@ -293,7 +322,8 @@ module.exports = {
     SYNC_SQL_WITH_ORA_Products,
     SYNC_SQL_WITH_ORA_Centers,
     SYNC_SQL_WITH_ORA_Customers,
-    SYNC_SQL_WITH_ORA_CustomerMandeEtebar    
+    SYNC_SQL_WITH_ORA_CustomerMandeEtebar,
+    DELETE_Expired_Token_Logs
 }
 
 

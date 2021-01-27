@@ -1,9 +1,10 @@
 
 const { MyErrorHandler } = require('../../../Utils/error')
-const { Sequelize, DataTypes } = require("sequelize")
+const { Sequelize, DataTypes, Op } = require("sequelize")
 const { sequelize } = require('../../../startup/db')
 
 
+var DB = require('../../../models/domain/init-models')(sequelize, DataTypes)
 
 
 const List_Category_Of_Products = async (req, res, next) => {
@@ -12,10 +13,13 @@ const List_Category_Of_Products = async (req, res, next) => {
 
     const allCats = await cats.findAll({
       attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('Category_L1_ID')), 'Category_L1_ID'],
-        'Category_L1_Name']
+        'Category_L1_Name'],
+      where: {
+        CENTERID: req.user.CID
+      }
     });
     res.status(200).send(allCats)
-  } catch (err) {    
+  } catch (err) {
     next(err)
   }
 }
@@ -26,10 +30,17 @@ const List_Category_Of_Products = async (req, res, next) => {
 
 const List_Products = async (req, res, next) => {
   try {
-    var productRepo = require('../../../models/domain/Product_Repository')(sequelize, DataTypes)
 
-    const allProducts = await productRepo.findAll();
-    res.status(200).send(allProducts)
+
+    const allProducts = await DB.Product_Repository.findAll({
+      where: {
+        CENTERID: req.user.CID
+      }
+    });
+
+    let result = allProducts.map(rec => ({ ...rec.dataValues, MOJUDI: Math.floor((rec.MOJUDI / rec.PACKAGEQUANTITY)) })
+    )
+    res.status(200).send(result)
   } catch (err) {
     next(err)
   }
@@ -40,14 +51,19 @@ const List_Products = async (req, res, next) => {
 
 const List_Products_By_Category = async (req, res, next) => {
   try {
-    var productRepo = require('../../../models/domain/Product_Repository')(sequelize, DataTypes)
 
-    const allProducts = await productRepo.findAll({
+
+    const allProducts = await DB.Product_Repository.findAll({
       where: {
-        Category_L1_ID: req.params.catID
+        [Op.and]: [
+          { Category_L1_ID: req.params.catID },
+          { CENTERID: req.user.CID }
+        ]
       }
     });
-    res.status(200).send(allProducts)
+
+    let result = allProducts.map(rec => ({ ...rec.dataValues, MOJUDI: Math.floor((rec.MOJUDI / rec.PACKAGEQUANTITY)) }));
+    res.status(200).send(result)
   } catch (err) {
     next(err)
   }
@@ -58,22 +74,26 @@ const List_Products_By_Category_Paginated = async (req, res, next) => {
   try {
     const Count_Per_page = 10;
     let page = req.params.page && req.params.page == 0 ? 1 : req.params.page;
-    console.log('page = ' + page)
+    // console.log('page = ' + page)
 
     if (!page) {
       List_Products_By_Category(req, res, next)
     } else {
-      var productRepo = require('../../../models/domain/Product_Repository')(sequelize, DataTypes)
 
-      await productRepo.findAndCountAll({
+
+      await DB.Product_Repository.findAndCountAll({
         where: {
-          Category_L1_ID: req.params.catID
+          [Op.and]: [
+            { Category_L1_ID: req.params.catID },
+            { CENTERID: req.user.CID }
+          ]
         },
         order: [],
         limit: Count_Per_page,
         offset: Count_Per_page * (page - 1),
       }).then(function (result) {
-        res.status(200).send(result);
+        let list = result.rows.map(rec => ({ ...rec.dataValues, MOJUDI: Math.floor((rec.MOJUDI / rec.PACKAGEQUANTITY)) }));
+        res.status(200).json({ count: result.count, rows: list });
       });
     }
 
@@ -107,11 +127,11 @@ const Bulk_Insert_Products = async (req, res, next) => {
 
   try {
     tran1 = await sequelize.transaction();
-    var productModel = require('../../../models/domain/Product_Repository')(sequelize, DataTypes)
 
 
-    await productModel.destroy({ where: {}, transaction: tran1 });
-    await productModel.bulkCreate(req.body, { transaction: tran1 });
+
+    await DB.Product_Repository.destroy({ where: {}, transaction: tran1 });
+    await DB.Product_Repository.bulkCreate(req.body, { transaction: tran1 });
 
     // commit
     await tran1.commit();
@@ -128,9 +148,7 @@ const Bulk_Insert_Products = async (req, res, next) => {
 const Increment_Product_Mojudi = async (req, res, next) => {
 
   try {
-    var productModel = require('../../../models/domain/Product_Repository')(sequelize, DataTypes)
-
-    productModel.increment('MOJUDI', {
+    await DB.Product_Repository.increment('MOJUDI', {
       by: Number(req.params.input),
       where: {
         [Op.and]: [
