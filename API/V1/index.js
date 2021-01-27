@@ -1,9 +1,10 @@
 
+// const { orderBy } = require("lodash")
 // const { poolPromise, sequelize } = require('../../startup/db')
 const timeLimitMiddleware = require('../../middlewares/timeLimitMiddleware')
 const validationMiddleware = require('../../middlewares/validationMiddleware')
-const { Insert_Order_ValidationRules } = require('../../Utils/validator')
-const AuthMiddleware = require('../../middlewares/authMiddleware')
+const { Insert_Order_ValidationRules, FROM_TO_ValidationRules, Product_PageID_ValidationRule } = require('../../Utils/validator')
+const authMiddleware = require('../../middlewares/authMiddleware')
 const express = require('express')
 const router = express.Router()
 const params = require('express-params')
@@ -18,18 +19,17 @@ const OrderController = require('./Controllers/orderController')
 const customerController = require('./Controllers/customerController')
 const centerController = require('./Controllers/centerController')
 const statusController = require('./Controllers/statusController')
-const { orderBy } = require("lodash")
 const userController = require('./Controllers/userController')
-const authMiddleware = require("../../middlewares/authMiddleware")
 
 
 
 
-router.get('/products/cat', AuthMiddleware, ProductController.List_Category_Of_Products)
+
+router.get('/products/cat', authMiddleware, ProductController.List_Category_Of_Products)
 //router.get('/products/subcat', ProductController.)
-router.get('/products', AuthMiddleware, ProductController.List_Products)
-router.get('/products/cat/:catID', AuthMiddleware, ProductController.List_Products_By_Category)
-router.get('/products/cat/:catID/page-:page', AuthMiddleware, ProductController.List_Products_By_Category_Paginated)
+router.get('/products', authMiddleware, ProductController.List_Products)
+router.get('/products/cat/:catID', authMiddleware, ProductController.List_Products_By_Category)
+router.get('/products/cat/:catID/page-:page', Product_PageID_ValidationRule(), [ authMiddleware, validationMiddleware], ProductController.List_Products_By_Category_Paginated)
 if (process.env.NODE_ENV === 'server61') {
     router.post('/products/bulk', ProductController.Bulk_Insert_Products)
     router.put('/products/:productID/center/:centerID/mojudi/:input', ProductController.Set_Mojudi_Kala)
@@ -75,11 +75,11 @@ if (process.env.NODE_ENV === 'server61') {
     router.get('/orders/oraread/:oraRead', OrderController.List_Orders_ByTIG_OraRead)
     router.get('/orders/:orderID/header', OrderController.Get_Order_Header)
     router.get('/orders/today/details', OrderController.List_Details_Of_Orders_Today)
-    router.get('/orders/from/:FROM/to/:TO/details', OrderController.List_Details_Of_Orders_FROM_TO)
+    router.get('/orders/from/:FROM/to/:TO/details', FROM_TO_ValidationRules(), validationMiddleware, OrderController.List_Details_Of_Orders_FROM_TO)
     router.put('/orders/:orderID/set/oraread/:bit', [timeLimitMiddleware, authMiddleware], OrderController.Set_OracleRead_Flag)
     router.delete('/orders/:orderID', authMiddleware, OrderController.Delete_Order)
     router.get('/orders/today', authMiddleware, OrderController.List_Orders_Of_Today)
-    router.get('/orders/from/:FROM/to/:TO', authMiddleware, OrderController.List_Orders_From_To)
+    router.get('/orders/from/:FROM/to/:TO', FROM_TO_ValidationRules(), [authMiddleware, validationMiddleware], OrderController.List_Orders_From_To)
 }
 // router.post('/orders/test', OrderController.test)
 

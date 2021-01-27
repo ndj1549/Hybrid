@@ -233,25 +233,44 @@
 
 // f()
 
-const _ = require('lodash')
+// const _ = require('lodash')
 
-var allProducts = [
-    {name:'Ali', age:23},
-    {name:'Ali', age:24},
-    {name:'Ali', age:25},
-    {name:'Ali', age:26},
-]
+// var allProducts = [
+//     {name:'Ali', age:23},
+//     {name:'Ali', age:24},
+//     {name:'Ali', age:25},
+//     {name:'Ali', age:26},
+// ]
 
-// _.map(allProducts, rec =>  { ...rec, "H":88} )
+// // _.map(allProducts, rec =>  { ...rec, "H":88} )
 
 
 
-const list = allProducts.map(rec => {
-    // console.log(rec)
-    // console.log({ ...rec, MOJUDI:rec.age * 2 })
-    return { ...rec, MOJUDI:rec.age * 2 }
-})
+// const list = allProducts.map(rec => {
+//     // console.log(rec)
+//     // console.log({ ...rec, MOJUDI:rec.age * 2 })
+//     return { ...rec, MOJUDI:rec.age * 2 }
+// })
 
-console.log(list)
+// console.log(list)
+
+
+function isValidDate(dateString) {
+    var regEx = /^\d{4}-\d{2}-\d{2}$/;
+    if(!dateString.match(regEx)) return false;  // Invalid format
+    var d = new Date(dateString);
+    var dNum = d.getTime();
+    if(!dNum && dNum !== 0) return false; // NaN value, Invalid date
+    return d.toISOString().slice(0,10) === dateString;
+  }
+  
+  
+  /* Example Uses */
+  console.log(isValidDate("0000-00-00"));  // false
+  console.log(isValidDate("2015-01-40"));  // false
+  console.log(isValidDate("2016-11-25"));  // true
+  console.log(isValidDate("1970-01-01"));  // true = epoch
+  console.log(isValidDate("1395-05-31")); 
+  console.log(isValidDate("1395-05-32")); 
 
 

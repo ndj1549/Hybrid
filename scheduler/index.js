@@ -31,7 +31,7 @@ schedule.scheduleJob('* * * * * *', function () {
 });
 
 
-schedule.scheduleJob('10 23 12 * * *', function () {
+schedule.scheduleJob('10 51 13 * * *', function () {
     // axios.get('http://localhost:5000/')
     //     .then(function (response) {
     //         // handle success
@@ -64,8 +64,8 @@ schedule.scheduleJob('20 33 11 * * *', function() {
     SYNC_SQL_WITH_ORA_Customers()
 })
 
-// schedule.scheduleJob('20 36 11 * * *', function() {
-//     DELETE_Expired_Token_Logs()
-// })
+schedule.scheduleJob('20 50 13 * * *', function() {
+    DELETE_Expired_Token_Logs()
+})
 
 
