@@ -13,13 +13,8 @@ const { Numeric } = require('mssql')
 
 
 
+
 var { Orders, OrderDetails } = require('../../../models/domain/init-models').initModels(sequelize)
-var productModel = require('../../../models/domain/Product_Repository')(sequelize, DataTypes)
-const { Product_Repository } = require('../../../models/domain/init-models')(sequelize)
-const DB = require('../../../models/domain/init-models')(sequelize)
-
-
-
 var DB = require('../../../models/domain/init-models')(sequelize, DataTypes)
 
 const Save_Order_On_Insert = async (req, res, next) => {
@@ -242,31 +237,32 @@ const Change_Order_Status = async (req, res, next) => {
         }
 
 
-        let FLAG_OperationSucceeded = false;
+        let _OperationSucceeded = false, _COMPENSATION_CALLED = false;
         if (_order.OrderStatusID === NewStatus) {
             res.sendStatus(200)
         }
         else if (NewStatus == 3) {
             // compensate ==> increase product mojudi
-            FLAG_OperationSucceeded = await COMPENSATE_PRODUCT_MOJUDI(_order.OrderID, req.user.CID, tran1, OP.PLUS)
+            _COMPENSATION_CALLED = true;
+            _OperationSucceeded = await COMPENSATE_PRODUCT_MOJUDI(_order.OrderID, req.user.CID, tran1, OP.PLUS)
         } else if (_order.OrderStatusID == 3) {
             // reverse compensate  ==> decrease product mojudi
-            FLAG_OperationSucceeded = await COMPENSATE_PRODUCT_MOJUDI(_order.OrderID, req.user.CID, tran1, OP.MINUS)
+            _COMPENSATION_CALLED = true;
+            _OperationSucceeded = await COMPENSATE_PRODUCT_MOJUDI(_order.OrderID, req.user.CID, tran1, OP.MINUS)
         }
 
 
-
-        if(FLAG_OperationSucceeded) {
-            await DB.Orders.update({ OrderStatusID: NewStatus }, {
-                where: {
-                    OrderID: _order.OrderID
-                },
-                transaction: tran1
-            })
-        } else {
+        if (_COMPENSATION_CALLED == true && ! _OperationSucceeded){
             throw new MyErrorHandler(500, 'Operation faced error !')
         }
 
+
+        await DB.Orders.update({ OrderStatusID: NewStatus }, {
+            where: {
+                OrderID: _order.OrderID
+            },
+            transaction: tran1
+        })
 
         // commit
         await tran1.commit();
@@ -309,7 +305,7 @@ const Delete_Order = async (req, res, next) => {
 
         // update mojudi anbar              
         const operationSucceeded = await COMPENSATE_PRODUCT_MOJUDI(_order.OrderID, req.user.CID, tran1, OP.PLUS)
-        
+
 
         if (operationSucceeded) {
             await DB.Orders.destroy({
@@ -337,14 +333,14 @@ const COMPENSATE_PRODUCT_MOJUDI = async (orderID, centerID, tran1, OpearationTyp
 
     try {
         var listDetails = await DB.OrderDetails.findAll({
-            where:{
+            where: {
                 OrderID: Number(orderID)
             }
         });
 
 
         let sign = 1;
-        if(OpearationType == OP.MINUS) {
+        if (OpearationType == OP.MINUS) {
             sign = -1;
         }
 
@@ -382,7 +378,7 @@ const Get_Order_Header = async (req, res, next) => {
             }
         })
 
-        if(!_order){
+        if (!_order) {
             throw new MyErrorHandler(404, 'Order Not Found')
         }
 
@@ -398,13 +394,13 @@ const List_Details_Of_Orders_Today = async (req, res, next) => {
     // console.log(currentDate)
 
     try {
-        
+
         const result = await DB.OrderDetails.findAll({
             where: {
                 InsertTimestamp: {
                     [Op.gte]: currentDate //m.add(1, 'day').format('YYYY-MM-DD')// gregorian date
                 }
-            }            
+            }
         })
 
         res.status(200).send(result)
@@ -415,47 +411,47 @@ const List_Details_Of_Orders_Today = async (req, res, next) => {
 }
 
 
-    const List_Details_Of_Orders_FROM_TO = async (req, res, next) => {
-        if (!req.params.FROM) {
-            res.status(400).send('From date is neccessary')
-        }
-    
-        // console.log(req.params.FROM)
-        // console.log(req.params.TO)
-        // convert dates from persian to gregorian
-        const m = moment();
-        const _from = moment.from(req.params.FROM, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD') // 
-        var _to = 0;
-        if (!req.params.TO) {
-            console.log("you didn't provide TO date; we set it to today by default")
-            _to = m.format('YYYY-MM-DD') // gregorian date
-        } else {
-            _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD')
-        }
-    
-        // console.log({ "from": _from, "to": _to })
-    
-    
-        try {            
-            const result = await DB.OrderDetails.findAll({
-                where: {
-                    InsertTimestamp: {
-                        [Op.and]: [
-                            { [Op.gte]: _from },
-                            { [Op.lte]: _to }
-                        ]
-                    }
-                }                
-            })
-    
-    
-            res.status(200).send(result)
-    
-        } catch (err) {
-            next(err)
-        }
+const List_Details_Of_Orders_FROM_TO = async (req, res, next) => {
+    if (!req.params.FROM) {
+        res.status(400).send('From date is neccessary')
     }
-    
+
+    // console.log(req.params.FROM)
+    // console.log(req.params.TO)
+    // convert dates from persian to gregorian
+    const m = moment();
+    const _from = moment.from(req.params.FROM, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD') // 
+    var _to = 0;
+    if (!req.params.TO) {
+        console.log("you didn't provide TO date; we set it to today by default")
+        _to = m.format('YYYY-MM-DD') // gregorian date
+    } else {
+        _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD')
+    }
+
+    // console.log({ "from": _from, "to": _to })
+
+
+    try {
+        const result = await DB.OrderDetails.findAll({
+            where: {
+                InsertTimestamp: {
+                    [Op.and]: [
+                        { [Op.gte]: _from },
+                        { [Op.lte]: _to }
+                    ]
+                }
+            }
+        })
+
+
+        res.status(200).send(result)
+
+    } catch (err) {
+        next(err)
+    }
+}
+
 
 module.exports = {
     Save_Order_On_Insert,

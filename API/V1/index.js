@@ -1,6 +1,8 @@
 
 // const { poolPromise, sequelize } = require('../../startup/db')
 const timeLimitMiddleware = require('../../middlewares/timeLimitMiddleware')
+const validationMiddleware = require('../../middlewares/validationMiddleware')
+const { Insert_Order_ValidationRules } = require('../../Utils/validator')
 const AuthMiddleware = require('../../middlewares/authMiddleware')
 const express = require('express')
 const router = express.Router()
@@ -65,18 +67,15 @@ router.get('/city/:cityID', CityController.Get_City_By_ID)
 
 
 
-router.post('/orders', [timeLimitMiddleware, authMiddleware], OrderController.Save_Order_On_Insert)
+router.post('/orders', Insert_Order_ValidationRules(), [timeLimitMiddleware, authMiddleware, validationMiddleware], OrderController.Save_Order_On_Insert)
 router.param('orderID', /^[0-9]+$/) // forcing the orderID parameter to be int
 router.get('/orders/:orderID', authMiddleware, OrderController.Get_Order_By_ID)
 router.put('/orders/:orderID/setStatus/:statusID', [timeLimitMiddleware, authMiddleware], OrderController.Change_Order_Status)
 if (process.env.NODE_ENV === 'server61') {
     router.get('/orders/oraread/:oraRead', OrderController.List_Orders_ByTIG_OraRead)
-    router.put('/orders/:orderID/set/oraread/:bit', timeLimitMiddleware, OrderController.Set_OracleRead_Flag)
-    router.delete('/orders/:orderID', OrderController.Delete_Order)
     router.get('/orders/:orderID/header', OrderController.Get_Order_Header)
     router.get('/orders/today/details', OrderController.List_Details_Of_Orders_Today)
     router.get('/orders/from/:FROM/to/:TO/details', OrderController.List_Details_Of_Orders_FROM_TO)
-
     router.put('/orders/:orderID/set/oraread/:bit', [timeLimitMiddleware, authMiddleware], OrderController.Set_OracleRead_Flag)
     router.delete('/orders/:orderID', authMiddleware, OrderController.Delete_Order)
     router.get('/orders/today', authMiddleware, OrderController.List_Orders_Of_Today)

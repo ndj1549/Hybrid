@@ -17,6 +17,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-params": "0.0.3",
+    "express-validator": "^6.9.2",
     "helmet": "^4.2.0",
     "jalali-moment": "^3.3.9",
     "jsonwebtoken": "^8.5.1",
