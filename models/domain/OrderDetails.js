@@ -53,6 +53,10 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     Tax: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true
+    },
+    Afzoode: {
       type: DataTypes.TINYINT,
       allowNull: true
     },

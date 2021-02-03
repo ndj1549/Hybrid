@@ -71,15 +71,20 @@ router.post('/orders', Insert_Order_ValidationRules(), [timeLimitMiddleware, aut
 router.param('orderID', /^[0-9]+$/) // forcing the orderID parameter to be int
 router.get('/orders/:orderID', authMiddleware, OrderController.Get_Order_By_ID)
 router.put('/orders/:orderID/setStatus/:statusID', [timeLimitMiddleware, authMiddleware], OrderController.Change_Order_Status)
+router.get('/orders/me/from/:FROM/to/:TO', FROM_TO_ValidationRules(), [authMiddleware, validationMiddleware], OrderController.List_MyOrders_From_To)
+router.get('/orders/:orderID/details', authMiddleware, OrderController.Get_Details_Of_OrderID)
+router.put('/orders/:orderID', authMiddleware, OrderController.Save_Order_On_Edit)
 if (process.env.NODE_ENV === 'server61') {
     router.get('/orders/oraread/:oraRead', OrderController.List_Orders_ByTIG_OraRead)
     router.get('/orders/:orderID/header', OrderController.Get_Order_Header)
     router.get('/orders/today/details', OrderController.List_Details_Of_Orders_Today)
     router.get('/orders/from/:FROM/to/:TO/details', FROM_TO_ValidationRules(), validationMiddleware, OrderController.List_Details_Of_Orders_FROM_TO)
+    router.get('/orders/from/:FROM/to/:TO', FROM_TO_ValidationRules(), [authMiddleware, validationMiddleware], OrderController.List_Orders_From_To)
     router.put('/orders/:orderID/set/oraread/:bit', [timeLimitMiddleware, authMiddleware], OrderController.Set_OracleRead_Flag)
     router.delete('/orders/:orderID', authMiddleware, OrderController.Delete_Order)
-    router.get('/orders/today', authMiddleware, OrderController.List_Orders_Of_Today)
-    router.get('/orders/from/:FROM/to/:TO', FROM_TO_ValidationRules(), [authMiddleware, validationMiddleware], OrderController.List_Orders_From_To)
+    router.get('/orders/today', authMiddleware, OrderController.List_Orders_Of_Today)    
+} else {
+    router.get('/orders/:orderID/header', authMiddleware, OrderController.Get_Order_Header)
 }
 // router.post('/orders/test', OrderController.test)
 

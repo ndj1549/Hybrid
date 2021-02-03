@@ -7,9 +7,9 @@ const Insert_Order_ValidationRules = () => {
             .notEmpty(),
         check('ShipAddress')
             .notEmpty(),
-        check('ShipCity')
-            .notEmpty()
-            .isNumeric(),
+        // check('ShipCity')
+        //     .notEmpty()
+        //     .isNumeric(),
         check('OrderDetails.*.ProductID')
             .notEmpty()
             .withMessage('اجباری')

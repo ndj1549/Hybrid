@@ -4,7 +4,7 @@ module.exports = function(sequelize, DataTypes) {
     OrderID: {
       type: DataTypes.BIGINT,
       allowNull: true,
-      // defaultValue: NEXT VALUE FOR [dbo].[Sequence_OrderID],
+      //defaultValue: NEXT VALUE FOR [dbo].[Sequence_OrderID],
       primaryKey: true
     },
     CustomerID_TFOra: {
@@ -35,6 +35,7 @@ module.exports = function(sequelize, DataTypes) {
     OrderStatusID: {
       type: DataTypes.TINYINT,
       allowNull: true,
+      defaultValue: 1,
       references: {
         model: 'OrderStatus',
         key: 'StatusID'
@@ -46,8 +47,9 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: false
     },
     TrackingCode: {
-      type: DataTypes.STRING(32),
-      allowNull: true
+      type: DataTypes.BIGINT,
+      allowNull: true,
+      //defaultValue: NEXT VALUE FOR [dbo].[Sequence_OrderTrackingCode]
     }
   }, {
     sequelize,

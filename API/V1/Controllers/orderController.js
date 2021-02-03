@@ -1,7 +1,7 @@
 
 const { MyErrorHandler } = require('../../../Utils/error')
 const { Sequelize, DataTypes, Op, ValidationError } = require("sequelize")
-const { sequelize } = require('../../../startup/db')
+const { sequelize, sql, poolPromise } = require('../../../startup/db')
 const TrackingCode = require('../../../Services/TrackingCode')
 const OP = require('../../../Utils/OperationType')
 const _ = require('lodash')
@@ -30,7 +30,7 @@ const Save_Order_On_Insert = async (req, res, next) => {
         // let order_header = _.pick(req.body, ['CustomerID_TFOra', 'UserID', 'ShippedDate', 'ShipCity', 'ShipAddress', 'OrderStatusID', 'OracleRead'])
         let order_header = _.pick(req.body, ['CustomerID_TFOra', 'ShippedDate', 'ShipCity', 'ShipAddress'])
 
-        order_header['TrackingCode'] = TrackingCode.generate()
+        //order_header['TrackingCode'] = TrackingCode.generate()
         order_header['OrderStatusID'] = 1;
         order_header['OracleRead'] = 0;
         order_header['UserID'] = req.user.ID;
@@ -129,10 +129,12 @@ const List_Orders_From_To = async (req, res, next) => {
         console.log("you didn't provide TO date; we set it to today by default")
         _to = m.format('YYYY-MM-DD') // gregorian date
     } else {
-        _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD')
+        _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
     }
 
     // console.log({ "from": _from, "to": _to })
+    const startDate = new Date(_from.toString());
+    const endDate = new Date(_to.toString());
 
 
     try {
@@ -141,8 +143,8 @@ const List_Orders_From_To = async (req, res, next) => {
             where: {
                 OrderDate: {
                     [Op.and]: [
-                        { [Op.gte]: _from },
-                        { [Op.lte]: _to }
+                        { [Op.gte]: startDate },
+                        { [Op.lte]: endDate }
                     ]
                 }
             },
@@ -151,6 +153,69 @@ const List_Orders_From_To = async (req, res, next) => {
 
 
         res.status(200).send(result)
+
+    } catch (err) {
+        next(err)
+    }
+}
+
+
+
+const List_MyOrders_From_To = async (req, res, next) => {
+
+    if (!req.params.FROM) {
+        res.status(400).send('From date is neccessary')
+    }
+
+
+    const m = moment();
+    const _from = moment.from(req.params.FROM, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD')
+    var _to = 0;
+    if (!req.params.TO) {
+        console.log("you didn't provide TO date; we set it to today by default")
+        _to = m.format('YYYY-MM-DD') // gregorian date
+    } else {
+        _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
+    }
+
+    // console.log({ "from": _from, "to": _to })
+
+    const startDate = new Date(_from.toString());
+    const endDate = new Date(_to.toString());
+
+
+    try {
+        // const result = await DB.Orders.findAll({
+        //     where: {
+        //         OrderDate: {
+        //             [Op.and]: [
+        //                 { [Op.gte]: startDate },
+        //                 { [Op.lte]: endDate }
+        //             ]
+        //         },
+        //         UserID: req.user.ID
+        //     },
+        //     include: DB.OrderDetails
+        // })
+
+
+        // res.status(200).send(result)
+
+
+        const pool = await poolPromise
+        const result = await pool.request()
+            .query(
+                `SELECT dbo.Orders.OrderID, dbo.Orders.CustomerID_TFOra, dbo.Orders.UserID, dbo.Orders.OrderDate,  \
+                          dbo.Orders.ShippedDate, dbo.Orders.ShipCity, dbo.Orders.ShipAddress, dbo.Orders.OrderStatusID,\ 
+                          dbo.Orders.OracleRead, dbo.Orders.TrackingCode, dbo.OrderStatus.StatusName, dbo.Customers.CustomerID, \
+                          dbo.Customers.CustomerName, dbo.Customers.CutomerFamily, dbo.Customers.PanelTitle, \
+                          dbo.Customers.MandeEtebar, dbo.Customers.Latitude, dbo.Customers.Longitude \
+            FROM   dbo.Orders \
+            INNER JOIN dbo.Customers ON dbo.Orders.CustomerID_TFOra = dbo.Customers.CustomerID_TFOra \
+            INNER JOIN dbo.OrderStatus ON dbo.Orders.OrderStatusID = dbo.OrderStatus.StatusID \
+            WHERE dbo.Orders.UserID = ${req.user.ID} AND dbo.Orders.OrderDate >= N'${_from}' AND dbo.Orders.OrderDate <= N'${_to}'`);
+
+        res.status(200).send(result.recordset)
 
     } catch (err) {
         next(err)
@@ -252,7 +317,7 @@ const Change_Order_Status = async (req, res, next) => {
         }
 
 
-        if (_COMPENSATION_CALLED == true && ! _OperationSucceeded){
+        if (_COMPENSATION_CALLED == true && !_OperationSucceeded) {
             throw new MyErrorHandler(500, 'Operation faced error !')
         }
 
@@ -372,17 +437,56 @@ const COMPENSATE_PRODUCT_MOJUDI = async (orderID, centerID, tran1, OpearationTyp
 
 const Get_Order_Header = async (req, res, next) => {
     try {
-        const _order = await DB.Orders.findOne({
-            where: {
-                OrderID: req.params.orderID
-            }
-        })
+        // const _order = await DB.Orders.findOne({
+        //     where: {
+        //         OrderID: req.params.orderID
+        //     }
+        // })
+        const pool = await poolPromise
+        const result = await pool.request()
+            .query(
+                `SELECT dbo.Orders.OrderID, dbo.Orders.CustomerID_TFOra, dbo.Orders.UserID, dbo.Orders.OrderDate, dbo.Orders.ShippedDate, dbo.Orders.ShipCity, 
+                    dbo.Orders.ShipAddress, dbo.Orders.OrderStatusID, dbo.Orders.OracleRead, 
+                    dbo.Orders.TrackingCode, dbo.OrderStatus.StatusName, dbo.OrderStatus.Description, dbo.Customers.CustomerID, dbo.Customers.CustomerName, 
+                    dbo.Customers.CutomerFamily, dbo.Customers.PanelTitle, dbo.Customers.MandeEtebar, dbo.Customers.Latitude, dbo.Customers.Longitude
+             FROM   dbo.Orders 
+             INNER JOIN dbo.Customers ON dbo.Orders.CustomerID_TFOra = dbo.Customers.CustomerID_TFOra 
+             INNER JOIN dbo.OrderStatus ON dbo.Orders.OrderStatusID = dbo.OrderStatus.StatusID
+             WHERE dbo.Orders.OrderID = ${req.params.orderID}`);
 
-        if (!_order) {
+        if (!result) {
             throw new MyErrorHandler(404, 'Order Not Found')
         }
 
-        res.status(200).send(_order)
+        res.status(200).json(result.recordset[0])
+    } catch (err) {
+        next(err)
+    }
+}
+
+const Get_Details_Of_OrderID = async (req, res, next) => {
+    try {
+
+        const pool = await poolPromise
+        const result = await pool.request()
+            .query(
+                `SELECT dbo.OrderDetails.OrderDetID, dbo.OrderDetails.OrderID, dbo.OrderDetails.ProductID, dbo.OrderDetails.Quantity,  
+                        dbo.OrderDetails.QuantityConfirmed, dbo.OrderDetails.PackSize, dbo.OrderDetails.PackgID, 
+                        dbo.OrderDetails.Discount, dbo.OrderDetails.Tonage, dbo.OrderDetails.Price_SingleItem,  
+                        dbo.OrderDetails.TotalPrice_AfterTax, dbo.OrderDetails.Tax, dbo.OrderDetails.Afzoode, dbo.OrderDetails.Avarez, 
+                        dbo.OrderDetails.InsertTimestamp, dbo.Product_Repository.TITLE, dbo.Product_Repository.MOJUDI,  
+                        dbo.Product_Repository.VAHED, dbo.Product_Repository.MAX_ORDER_CAPACITY,                         
+                        dbo.Product_Repository.CATEGORY_L1_ID, dbo.Product_Repository.CATEGORY_L1_NAME, dbo.Product_Repository.DISPLAY, 
+                        dbo.Product_Repository.PRICE, 
+                        dbo.Product_Repository.PACKAGEQUANTITY, dbo.Product_Repository.LASTUPDATE, 
+                        dbo.Product_Repository.TAX AS Prod_TAX, dbo.Product_Repository.AFZOODE AS Prod_AFZOODE, 
+                        dbo.Product_Repository.AVAREZ AS Prod_AVAREZ, dbo.Product_Repository.PACKAGEWEIGHT 
+                FROM    dbo.OrderDetails
+                INNER JOIN  dbo.Product_Repository  ON dbo.OrderDetails.ProductID = dbo.Product_Repository.PRODUCTIDORA
+                WHERE	dbo.OrderDetails.OrderID = ${req.params.orderID}`);
+
+        res.status(200).json(result.recordset)
+
     } catch (err) {
         next(err)
     }
@@ -453,6 +557,93 @@ const List_Details_Of_Orders_FROM_TO = async (req, res, next) => {
 }
 
 
+
+const Save_Order_On_Edit = async (req, res, next) => {
+    let tran1;
+    try {
+        tran1 = await sequelize.transaction();
+
+
+        //  STEP 1: 
+        let listOrderDetails_DB = await DB.OrderDetails.findAll({
+            where: {
+                OrderID: Number(req.params.orderID)
+            }
+        })
+
+
+        let listOrderDetails_BODY = req.body.OrderDetails;
+
+
+
+        //  STEP 2: 
+        await DB.OrderDetails.destroy({
+            where: {
+                OrderID: Number(req.params.orderID)
+            },
+            transaction: tran1
+        });
+
+
+        // update mojudi anbar ==> INCREASE     
+        var listPromises = []
+        listOrderDetails_DB.forEach((rec) => {
+            // console.log(rec)
+            listPromises.push(DB.Product_Repository.increment('MOJUDI', {
+                by: Number(rec.Quantity * rec.PackSize),
+                where: {
+                    [Op.and]: [
+                        { PRODUCTIDORA: Number(rec.ProductID) },
+                        { CENTERID: Number(req.user.CID) },// set through Auth middleware
+                    ]
+                },
+                transaction: tran1
+            }))
+        })
+        await Promise.all(listPromises)
+
+
+
+
+        //  STEP 3: 
+        let detailsList = _.map(listOrderDetails_BODY, o => _.omit(o, ['OrderDetID']));
+        var list = []
+        detailsList.forEach(rec => {
+            rec = { ...rec, OrderID: Number(req.params.orderID) }
+            //rec['OrderID'] = newOrder.dataValues.OrderID
+            list.push(rec)
+        })
+        await DB.OrderDetails.bulkCreate(list, { transaction: tran1 });
+
+        // update mojudi anbar ==> DECREASE
+        listPromises = []
+        list.forEach((rec) => {            
+            listPromises.push(DB.Product_Repository.decrement('MOJUDI', {
+                by: Number(rec.Quantity * rec.PackSize),
+                where: {
+                    [Op.and]: [
+                        { PRODUCTIDORA: Number(rec.ProductID) },
+                        { CENTERID: Number(req.user.CID) },// set through Auth middleware
+                    ]
+                },
+                transaction: tran1
+            }))
+        })
+        await Promise.all(listPromises)
+
+
+
+        // commit
+        await tran1.commit();
+        res.sendStatus(200); // equivalent to res.status(200).send('OK')
+
+    } catch (err) {
+        await tran1.rollback();
+        next(err)
+    }
+}
+
+
 module.exports = {
     Save_Order_On_Insert,
     // Save_Order_On_Edit,
@@ -466,8 +657,11 @@ module.exports = {
     List_Details_Of_Orders_Today,
     List_Details_Of_Orders_FROM_TO,
     Get_Order_Header,
+    Get_Details_Of_OrderID,
     List_Orders_From_To,
+    List_MyOrders_From_To,
     Change_Order_Status,
     // Modify_Order_Details_Confirm_ByTIG,
-    Delete_Order
+    Delete_Order,
+    Save_Order_On_Edit
 }

@@ -1,7 +1,7 @@
 module.exports = (req, res, next) => {
 
     var startPoint = "02:00:00",
-    finishPoint = "02:45:00";
+    finishPoint = "02:55:00";
 
     var _now = new Date().toLocaleTimeString()
 

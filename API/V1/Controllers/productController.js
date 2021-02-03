@@ -2,6 +2,7 @@
 const { MyErrorHandler } = require('../../../Utils/error')
 const { Sequelize, DataTypes, Op } = require("sequelize")
 const { sequelize } = require('../../../startup/db')
+const { DateTime } = require('mssql')
 
 
 var DB = require('../../../models/domain/init-models')(sequelize, DataTypes)
@@ -38,8 +39,17 @@ const List_Products = async (req, res, next) => {
       }
     });
 
-    let result = allProducts.map(rec => ({ ...rec.dataValues, MOJUDI: Math.floor((rec.MOJUDI / rec.PACKAGEQUANTITY)) })
-    )
+    let result = allProducts.map(rec => ({ ...rec.dataValues, MOJUDI: Math.floor((rec.MOJUDI / rec.PACKAGEQUANTITY)) }));
+
+    if (result && result.length != 0 && result[0]) {      
+      if (new Date().toDateString() !== new Date(Date.parse(result[0].LASTUPDATE.toString())).toDateString()) {
+        return res.status(200).send([])
+        // res.status(200).send([])
+        // return
+      }
+    }
+
+
     res.status(200).send(result)
   } catch (err) {
     next(err)
@@ -63,6 +73,16 @@ const List_Products_By_Category = async (req, res, next) => {
     });
 
     let result = allProducts.map(rec => ({ ...rec.dataValues, MOJUDI: Math.floor((rec.MOJUDI / rec.PACKAGEQUANTITY)) }));
+
+    if (result && result.length != 0 && result[0]) {
+      
+      if (new Date().toDateString() !== new Date(Date.parse(result[0].LASTUPDATE.toString())).toDateString()) {
+        return res.status(200).send([])
+        // res.status(200).send([])
+        // return
+      }
+    }
+
     res.status(200).send(result)
   } catch (err) {
     next(err)
@@ -93,6 +113,18 @@ const List_Products_By_Category_Paginated = async (req, res, next) => {
         offset: Count_Per_page * (page - 1),
       }).then(function (result) {
         let list = result.rows.map(rec => ({ ...rec.dataValues, MOJUDI: Math.floor((rec.MOJUDI / rec.PACKAGEQUANTITY)) }));
+
+        if (list && list.length != 0 && list[0]) {
+          // let q = new Date();
+          // let m = q.getMonth();
+          // let d = q.getDay();
+          // let y = q.getFullYear();
+
+          if (new Date().toDateString() !== new Date(Date.parse(list[0].LASTUPDATE.toString())).toDateString()) {
+            return res.status(200).json({ count: 0, rows: [] });
+          }
+        }
+
         res.status(200).json({ count: result.count, rows: list });
       });
     }

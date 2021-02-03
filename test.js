@@ -220,7 +220,7 @@
 //     r = _.map(r, rec => rec.dataValues)
 //     console.log(r)
 
-    
+
 
 //     // const diffTime = Math.abs(date2 - date1);
 //     // const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));    
@@ -255,22 +255,61 @@
 // console.log(list)
 
 
-function isValidDate(dateString) {
-    var regEx = /^\d{4}-\d{2}-\d{2}$/;
-    if(!dateString.match(regEx)) return false;  // Invalid format
-    var d = new Date(dateString);
-    var dNum = d.getTime();
-    if(!dNum && dNum !== 0) return false; // NaN value, Invalid date
-    return d.toISOString().slice(0,10) === dateString;
-  }
-  
-  
-  /* Example Uses */
-  console.log(isValidDate("0000-00-00"));  // false
-  console.log(isValidDate("2015-01-40"));  // false
-  console.log(isValidDate("2016-11-25"));  // true
-  console.log(isValidDate("1970-01-01"));  // true = epoch
-  console.log(isValidDate("1395-05-31")); 
-  console.log(isValidDate("1395-05-32")); 
+// function isValidDate(dateString) {
+//     var regEx = /^\d{4}-\d{2}-\d{2}$/;
+//     if(!dateString.match(regEx)) return false;  // Invalid format
+//     var d = new Date(dateString);
+//     var dNum = d.getTime();
+//     if(!dNum && dNum !== 0) return false; // NaN value, Invalid date
+//     return d.toISOString().slice(0,10) === dateString;
+//   }
 
+
+//   /* Example Uses */
+//   console.log(isValidDate("0000-00-00"));  // false
+//   console.log(isValidDate("2015-01-40"));  // false
+//   console.log(isValidDate("2016-11-25"));  // true
+//   console.log(isValidDate("1970-01-01"));  // true = epoch
+//   console.log(isValidDate("1395-05-31")); 
+//   console.log(isValidDate("1395-05-32")); 
+
+
+
+// let today = new Date('1399-11-12').toDateString('en-US');
+// console.log(today);
+
+// let today2 = new Date().toLocaleDateString('fa-IR');
+// console.log(today2);
+
+
+const moment = require('jalali-moment')
+
+// parse jalali date
+// m = moment('1367/11/04', 'jYYYY/jMM/jDD');
+m = moment.from('1367/04/11', 'fa', 'YYYY/MM/DD');
+// m = moment.from('04/1367/11', 'fa', 'DD/YYYY/MM');
+
+console.log(moment.from('1367/11/04', 'fa', 'YYYY/MM/DD').format('YYYY/MM/DD')); // 1989/01/24
+
+
+let q = new Date();
+let month = q.getMonth();
+let d = q.getDay();
+let y = q.getFullYear()
+
+console.log(new Date(y, month, d).toDateString())
+console.log(new Date('2021-01-31 11:03:06.830').toDateString())
+
+
+var today = new Date();
+var dd = String(today.getDate()).padStart(2, '0');
+var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+var yyyy = today.getFullYear();
+
+//today = mm + '/' + dd + '/' + yyyy;
+today_ = dd + '/' + mm + '/' + yyyy;
+console.log(Date.parse(today))
+console.log(new Date(Date.parse(today)).toDateString())
+console.log(new Date(Date.parse(today)).toDateString() === new Date(Date.parse('2021-01-31 11:03:06.830')).toDateString())
+console.log(new Date().toDateString() === new Date(Date.parse('2021-01-31 11:03:06.830')).toDateString())
 

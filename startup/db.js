@@ -22,7 +22,12 @@ const sequelize = new Sequelize(DBconfig.database, DBconfig.user, DBconfig.passw
     host: DBconfig.server,
     port: config.get("connStr.sql").port,
     dialect: config.get("connStr.sql").dialect,
-    omitNull: true
+    omitNull: true,
+    dialectOptions: {
+      options: {
+        requestTimeout: 30000
+      }
+    },
   });
 
 
