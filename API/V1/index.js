@@ -73,6 +73,7 @@ router.get('/orders/:orderID', authMiddleware, OrderController.Get_Order_By_ID)
 router.put('/orders/:orderID/setStatus/:statusID', [timeLimitMiddleware, authMiddleware], OrderController.Change_Order_Status)
 router.get('/orders/me/from/:FROM/to/:TO', FROM_TO_ValidationRules(), [authMiddleware, validationMiddleware], OrderController.List_MyOrders_From_To)
 router.get('/orders/:orderID/details', authMiddleware, OrderController.Get_Details_Of_OrderID)
+router.post('/orders/check-products', authMiddleware, OrderController.Inquire_MyCartLines_Price_Quantity)
 router.put('/orders/:orderID', authMiddleware, OrderController.Save_Order_On_Edit)
 if (process.env.NODE_ENV === 'server61') {
     router.get('/orders/oraread/:oraRead', OrderController.List_Orders_ByTIG_OraRead)

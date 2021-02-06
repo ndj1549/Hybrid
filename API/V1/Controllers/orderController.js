@@ -14,12 +14,20 @@ const moment = require('jalali-moment')
 
 
 
+
 var { Orders, OrderDetails } = require('../../../models/domain/init-models').initModels(sequelize)
 var DB = require('../../../models/domain/init-models')(sequelize, DataTypes)
 
 const Save_Order_On_Insert = async (req, res, next) => {
 
     let tran1;
+
+    let m = moment();
+    m = moment(m.format('YYYY/MM/DD'), 'YYYY/MM/DDD');// parse a gregorian (miladi) date
+    // console.log(m.format('jYYYY/jMM/jDD')); // 1399/11/05
+    // console.log(m.format('jYYYYjMMjDD')); // 13991105
+
+
 
     try {
         //console.log(req.body)
@@ -28,17 +36,20 @@ const Save_Order_On_Insert = async (req, res, next) => {
         tran1 = await sequelize.transaction();
 
         // let order_header = _.pick(req.body, ['CustomerID_TFOra', 'UserID', 'ShippedDate', 'ShipCity', 'ShipAddress', 'OrderStatusID', 'OracleRead'])
-        let order_header = _.pick(req.body, ['CustomerID_TFOra', 'ShippedDate', 'ShipCity', 'ShipAddress'])
+        let order_header = _.pick(req.body, ['OrderType', 'WhichOrderID', 'CustomerID_TFOra', 'ShippedDate', 'ShipCity', 'ShipAddress'])
 
         //order_header['TrackingCode'] = TrackingCode.generate()
-        order_header['OrderStatusID'] = 1;
+        // OrderType == 1 : means this is a new order to register
+        // OrderType == 2 : means this is a new order to register but to extradite some details of a previously registered order
+        order_header['OrderStatusID'] = order_header['OrderType'] === 1 ? 1 : 9; // 9 is مرجوعی
         order_header['OracleRead'] = 0;
         order_header['UserID'] = req.user.ID;
+        order_header['IntOrderDate'] = Number(moment(new Date(), 'YYYY/MM/DDD').locale('fa').format('YYYYMMDD'))
         const newOrder = await DB.Orders.create(order_header, { transaction: tran1 });
         //console.log(newOrder.dataValues)
         var list = []
         req.body.OrderDetails.forEach(rec => {
-            rec = { ...rec, OrderID: Number(newOrder.dataValues.OrderID) }
+            rec = { ...rec, OrderID: Number(newOrder.dataValues.OrderID), IntDate: order_header['IntOrderDate'] }
             //rec['OrderID'] = newOrder.dataValues.OrderID
             list.push(rec)
         })
@@ -54,7 +65,10 @@ const Save_Order_On_Insert = async (req, res, next) => {
         //     await tran1.rollback();// Is this the right place?
         //     next(err)
         // })
-        await DB.OrderDetails.bulkCreate(detailsList, { transaction: tran1 });
+        detailsList.forEach(async (rec) => {
+            await DB.OrderDetails.create(rec, { transaction: tran1 })
+        })
+        // await DB.OrderDetails.bulkCreate(detailsList, { transaction: tran1 });
 
 
 
@@ -96,11 +110,19 @@ const List_Orders_Of_Today = async (req, res, next) => {
 
     try {
 
+        // const result = await DB.Orders.findAll({
+        //     where: {
+        //         OrderDate: {
+        //             [Op.gte]: currentDate //m.add(1, 'day').format('YYYY-MM-DD')// gregorian date
+        //         }
+        //     },
+        //     include: DB.OrderDetails
+        // })
+
+
         const result = await DB.Orders.findAll({
             where: {
-                OrderDate: {
-                    [Op.gte]: currentDate //m.add(1, 'day').format('YYYY-MM-DD')// gregorian date
-                }
+                IntOrderDate: Number(moment(new Date(), 'YYYY/MM/DDD').locale('fa').format('YYYYMMDD'))
             },
             include: DB.OrderDetails
         })
@@ -122,26 +144,32 @@ const List_Orders_From_To = async (req, res, next) => {
     // console.log(req.params.FROM)
     // console.log(req.params.TO)
     // convert dates from persian to gregorian
-    const m = moment();
-    const _from = moment.from(req.params.FROM, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD')
-    var _to = 0;
-    if (!req.params.TO) {
-        console.log("you didn't provide TO date; we set it to today by default")
-        _to = m.format('YYYY-MM-DD') // gregorian date
-    } else {
-        _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
-    }
+    // const m = moment();
+    // const _from = moment.from(req.params.FROM, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD')
+    // var _to = 0;
+    // if (!req.params.TO) {
+    //     console.log("you didn't provide TO date; we set it to today by default")
+    //     _to = m.format('YYYY-MM-DD') // gregorian date
+    // } else {
+    //     _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
+    // }
 
-    // console.log({ "from": _from, "to": _to })
-    const startDate = new Date(_from.toString());
-    const endDate = new Date(_to.toString());
+    // // console.log({ "from": _from, "to": _to })
+    // const startDate = new Date(_from.toString());
+    // const endDate = new Date(_to.toString());
+
+    const startDate = Number(req.params.FROM.replace(/-/g, ""))
+    const endDate = (!req.params.TO) ? startDate : Number(req.params.TO.replace(/-/g, ""))
+
+
+
 
 
     try {
         // const { Orders, OrderDetails } = require('../../../models/domain/init-models')(sequelize, DataTypes)
         const result = await DB.Orders.findAll({
             where: {
-                OrderDate: {
+                IntOrderDate: {
                     [Op.and]: [
                         { [Op.gte]: startDate },
                         { [Op.lte]: endDate }
@@ -168,20 +196,23 @@ const List_MyOrders_From_To = async (req, res, next) => {
     }
 
 
-    const m = moment();
-    const _from = moment.from(req.params.FROM, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD')
-    var _to = 0;
-    if (!req.params.TO) {
-        console.log("you didn't provide TO date; we set it to today by default")
-        _to = m.format('YYYY-MM-DD') // gregorian date
-    } else {
-        _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
-    }
+    // const m = moment();
+    // const _from = moment.from(req.params.FROM, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD')
+    // var _to = 0;
+    // if (!req.params.TO) {
+    //     console.log("you didn't provide TO date; we set it to today by default")
+    //     _to = m.format('YYYY-MM-DD') // gregorian date
+    // } else {
+    //     _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
+    // }
 
-    // console.log({ "from": _from, "to": _to })
+    // // console.log({ "from": _from, "to": _to })
 
-    const startDate = new Date(_from.toString());
-    const endDate = new Date(_to.toString());
+    // const startDate = new Date(_from.toString());
+    // const endDate = new Date(_to.toString());
+
+    const startDate = Number(req.params.FROM.replace(/-/g, ""))
+    const endDate = (!req.params.TO) ? startDate : Number(req.params.TO.replace(/-/g, ""))
 
 
     try {
@@ -205,7 +236,7 @@ const List_MyOrders_From_To = async (req, res, next) => {
         const pool = await poolPromise
         const result = await pool.request()
             .query(
-                `SELECT dbo.Orders.OrderID, dbo.Orders.CustomerID_TFOra, dbo.Orders.UserID, dbo.Orders.OrderDate,  \
+                `SELECT dbo.Orders.OrderID, dbo.Orders.OrderType, dbo.Orders.WhichOrderID, dbo.Orders.IntOrderDate, dbo.Orders.CustomerID_TFOra, dbo.Orders.UserID, dbo.Orders.OrderDate,  \
                           dbo.Orders.ShippedDate, dbo.Orders.ShipCity, dbo.Orders.ShipAddress, dbo.Orders.OrderStatusID,\ 
                           dbo.Orders.OracleRead, dbo.Orders.TrackingCode, dbo.OrderStatus.StatusName, dbo.Customers.CustomerID, \
                           dbo.Customers.CustomerName, dbo.Customers.CutomerFamily, dbo.Customers.PanelTitle, \
@@ -213,7 +244,7 @@ const List_MyOrders_From_To = async (req, res, next) => {
             FROM   dbo.Orders \
             INNER JOIN dbo.Customers ON dbo.Orders.CustomerID_TFOra = dbo.Customers.CustomerID_TFOra \
             INNER JOIN dbo.OrderStatus ON dbo.Orders.OrderStatusID = dbo.OrderStatus.StatusID \
-            WHERE dbo.Orders.UserID = ${req.user.ID} AND dbo.Orders.OrderDate >= N'${_from}' AND dbo.Orders.OrderDate <= N'${_to}'`);
+            WHERE dbo.Orders.UserID = ${req.user.ID} AND dbo.Orders.IntOrderDate >= ${startDate} AND dbo.Orders.IntOrderDate <= ${endDate} `);
 
         res.status(200).send(result.recordset)
 
@@ -445,16 +476,19 @@ const Get_Order_Header = async (req, res, next) => {
         const pool = await poolPromise
         const result = await pool.request()
             .query(
-                `SELECT dbo.Orders.OrderID, dbo.Orders.CustomerID_TFOra, dbo.Orders.UserID, dbo.Orders.OrderDate, dbo.Orders.ShippedDate, dbo.Orders.ShipCity, 
+                `SELECT dbo.Orders.OrderID, dbo.Orders.CustomerID_TFOra, dbo.Orders.UserID, dbo.Orders.OrderDate,
+                    dbo.Orders.OrderType, dbo.Orders.WhichOrderID, dbo.Orders.IntOrderDate,
+                    dbo.Orders.ShippedDate, dbo.Orders.ShipCity, 
                     dbo.Orders.ShipAddress, dbo.Orders.OrderStatusID, dbo.Orders.OracleRead, 
-                    dbo.Orders.TrackingCode, dbo.OrderStatus.StatusName, dbo.OrderStatus.Description, dbo.Customers.CustomerID, dbo.Customers.CustomerName, 
+                    dbo.Orders.TrackingCode, dbo.OrderStatus.StatusName, dbo.OrderStatus.Description, 
+                    dbo.Customers.CustomerID, dbo.Customers.CustomerName, 
                     dbo.Customers.CutomerFamily, dbo.Customers.PanelTitle, dbo.Customers.MandeEtebar, dbo.Customers.Latitude, dbo.Customers.Longitude
              FROM   dbo.Orders 
              INNER JOIN dbo.Customers ON dbo.Orders.CustomerID_TFOra = dbo.Customers.CustomerID_TFOra 
              INNER JOIN dbo.OrderStatus ON dbo.Orders.OrderStatusID = dbo.OrderStatus.StatusID
              WHERE dbo.Orders.OrderID = ${req.params.orderID}`);
 
-        if (!result) {
+        if (!result || result.recordset.length == 0) {
             throw new MyErrorHandler(404, 'Order Not Found')
         }
 
@@ -499,11 +533,16 @@ const List_Details_Of_Orders_Today = async (req, res, next) => {
 
     try {
 
+        // const result = await DB.OrderDetails.findAll({
+        //     where: {
+        //         InsertTimestamp: {
+        //             [Op.gte]: currentDate //m.add(1, 'day').format('YYYY-MM-DD')// gregorian date
+        //         }
+        //     }
+        // })
         const result = await DB.OrderDetails.findAll({
             where: {
-                InsertTimestamp: {
-                    [Op.gte]: currentDate //m.add(1, 'day').format('YYYY-MM-DD')// gregorian date
-                }
+                IntDate: Number(moment(new Date(), 'YYYY/MM/DDD').locale('fa').format('YYYYMMDD'))
             }
         })
 
@@ -523,26 +562,30 @@ const List_Details_Of_Orders_FROM_TO = async (req, res, next) => {
     // console.log(req.params.FROM)
     // console.log(req.params.TO)
     // convert dates from persian to gregorian
-    const m = moment();
-    const _from = moment.from(req.params.FROM, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD') // 
-    var _to = 0;
-    if (!req.params.TO) {
-        console.log("you didn't provide TO date; we set it to today by default")
-        _to = m.format('YYYY-MM-DD') // gregorian date
-    } else {
-        _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD')
-    }
+    // const m = moment();
+    // const _from = moment.from(req.params.FROM, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD') // 
+    // var _to = 0;
+    // if (!req.params.TO) {
+    //     console.log("you didn't provide TO date; we set it to today by default")
+    //     _to = m.format('YYYY-MM-DD') // gregorian date
+    // } else {
+    //     _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD')
+    // }
 
     // console.log({ "from": _from, "to": _to })
+
+
+    const startDate = Number(req.params.FROM.replace(/-/g, ""))
+    const endDate = (!req.params.TO) ? startDate : Number(req.params.TO.replace(/-/g, ""))
 
 
     try {
         const result = await DB.OrderDetails.findAll({
             where: {
-                InsertTimestamp: {
+                IntDate: {
                     [Op.and]: [
-                        { [Op.gte]: _from },
-                        { [Op.lte]: _to }
+                        { [Op.gte]: startDate },
+                        { [Op.lte]: endDate }
                     ]
                 }
             }
@@ -577,60 +620,69 @@ const Save_Order_On_Edit = async (req, res, next) => {
 
 
         //  STEP 2: 
-        await DB.OrderDetails.destroy({
-            where: {
-                OrderID: Number(req.params.orderID)
-            },
-            transaction: tran1
-        });
-
-
-        // update mojudi anbar ==> INCREASE     
-        var listPromises = []
-        listOrderDetails_DB.forEach((rec) => {
-            // console.log(rec)
-            listPromises.push(DB.Product_Repository.increment('MOJUDI', {
-                by: Number(rec.Quantity * rec.PackSize),
+        if (req.body.OrderType === 1) { // gonna edit a usual order (not مرجوعی)
+            await DB.OrderDetails.destroy({
                 where: {
-                    [Op.and]: [
-                        { PRODUCTIDORA: Number(rec.ProductID) },
-                        { CENTERID: Number(req.user.CID) },// set through Auth middleware
-                    ]
+                    OrderID: Number(req.params.orderID)
                 },
                 transaction: tran1
-            }))
-        })
-        await Promise.all(listPromises)
+            });
 
 
+            // update mojudi anbar ==> INCREASE     
+            var listPromises = []
+            listOrderDetails_DB.forEach((rec) => {
+                // console.log(rec)
+                listPromises.push(DB.Product_Repository.increment('MOJUDI', {
+                    by: Number(rec.Quantity * rec.PackSize),
+                    where: {
+                        [Op.and]: [
+                            { PRODUCTIDORA: Number(rec.ProductID) },
+                            { CENTERID: Number(req.user.CID) },// set through Auth middleware
+                        ]
+                    },
+                    transaction: tran1
+                }))
+            })
+            await Promise.all(listPromises)
+
+            //  STEP 3: 
+            let detailsList = _.map(listOrderDetails_BODY, o => _.omit(o, ['OrderDetID']));
+            var list = []
+            detailsList.forEach(rec => {
+                rec = { ...rec, OrderID: Number(req.params.orderID) }
+                //rec['OrderID'] = newOrder.dataValues.OrderID
+                list.push(rec)
+            })
+            await DB.OrderDetails.bulkCreate(list, { transaction: tran1 });
+
+            // update mojudi anbar ==> DECREASE
+            listPromises = []
+            list.forEach((rec) => {
+                listPromises.push(DB.Product_Repository.decrement('MOJUDI', {
+                    by: Number(rec.Quantity * rec.PackSize),
+                    where: {
+                        [Op.and]: [
+                            { PRODUCTIDORA: Number(rec.ProductID) },
+                            { CENTERID: Number(req.user.CID) },// set through Auth middleware
+                        ]
+                    },
+                    transaction: tran1
+                }))
+            })
+            await Promise.all(listPromises)
 
 
-        //  STEP 3: 
-        let detailsList = _.map(listOrderDetails_BODY, o => _.omit(o, ['OrderDetID']));
-        var list = []
-        detailsList.forEach(rec => {
-            rec = { ...rec, OrderID: Number(req.params.orderID) }
-            //rec['OrderID'] = newOrder.dataValues.OrderID
-            list.push(rec)
-        })
-        await DB.OrderDetails.bulkCreate(list, { transaction: tran1 });
+        } else { // gonna edit an extradition order (ویرایش سفارش مرجوعی)
 
-        // update mojudi anbar ==> DECREASE
-        listPromises = []
-        list.forEach((rec) => {            
-            listPromises.push(DB.Product_Repository.decrement('MOJUDI', {
-                by: Number(rec.Quantity * rec.PackSize),
-                where: {
-                    [Op.and]: [
-                        { PRODUCTIDORA: Number(rec.ProductID) },
-                        { CENTERID: Number(req.user.CID) },// set through Auth middleware
-                    ]
-                },
-                transaction: tran1
-            }))
-        })
-        await Promise.all(listPromises)
-
+            listOrderDetails_BODY.forEach(async (rec) => {
+                await DB.OrderDetails.update(_.pick(rec, ['ProductID', 'Quantity', 'Tax', 'Afzoode', 'Avarez', 'Price_SingleItem']), {
+                    where: {
+                        OrderDetID: Number(rec.OrderDetID)
+                    }
+                })
+            })
+        }
 
 
         // commit
@@ -639,6 +691,41 @@ const Save_Order_On_Edit = async (req, res, next) => {
 
     } catch (err) {
         await tran1.rollback();
+        next(err)
+    }
+}
+
+
+const Inquire_MyCartLines_Price_Quantity = async (req, res, next) => {
+    try {
+        const dic_Client = req.body.items;
+        const result = await DB.Product_Repository.findAll({
+            where: {
+                CENTERID: req.user.CID,
+                PRODUCTIDORA: {
+                    [Op.in]: Object.keys(dic_Client)
+                }                
+            }
+        });
+
+        var list = result.map(o => o.dataValues).map(r => _.pick(r, ['PRODUCTIDORA', 'MOJUDI', 'PACKAGEQUANTITY', 'PRICE']))
+        // const output = _.reduce(
+        //     list,
+        //     (acc, { PRODUCTIDORA, CENTERID, MOJUDI, PRICE }) => ({ ...acc, [PRODUCTIDORA]: {CENTERID,PRICE, "QUANTITY": MOJUDI} }),
+        //     {}
+        // )
+
+        const dic_DB = list.reduce((acc, { PRODUCTIDORA, MOJUDI, PRICE, PACKAGEQUANTITY }) => 
+                                        ({...acc, [PRODUCTIDORA]: { PRICE, "QUANTITY": Math.floor(( MOJUDI / PACKAGEQUANTITY))} }), {});
+
+        const output = {}
+        Object.keys(dic_DB)
+              .filter(key => ( (dic_Client[key].PRICE !== dic_DB[key].PRICE) || (dic_Client[key].QUANTITY > dic_DB[key].QUANTITY) ))
+              .forEach(key => output[key] = dic_DB[key])
+
+        const success = Object.keys(output).length === 0 ? true : false;
+        res.status(200).json({ items: output, success})
+    } catch (err) {
         next(err)
     }
 }
@@ -663,5 +750,6 @@ module.exports = {
     Change_Order_Status,
     // Modify_Order_Details_Confirm_ByTIG,
     Delete_Order,
-    Save_Order_On_Edit
+    Save_Order_On_Edit,
+    Inquire_MyCartLines_Price_Quantity
 }

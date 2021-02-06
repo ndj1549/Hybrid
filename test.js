@@ -7,13 +7,13 @@
 
 // // // console.log( new Date().toLocaleDateString('fa-IR'))
 
-// // const moment = require('jalali-moment')
-// // const m = moment();
+// const moment = require('jalali-moment')
+// const m = moment();
 
 
 
-// // console.log(m.format('YYYY-MM-DD'))
-// // console.log('***************************')
+// console.log(m.format('YYYY-MM-DD'))
+// console.log('***************************')
 
 
 // // console.log(m.format('YYYY-MM-DD'))
@@ -283,6 +283,41 @@
 
 
 const moment = require('jalali-moment')
+
+
+var m = moment();
+
+
+
+// console.log(m.format('YYYY-MM-DD'))
+// console.log(moment.from(m.format('YYYY-MM-DD'), 'fa', 'DD/YYYY/MM').format('DD/YYYY/MM'))
+// console.log(moment.from('1367/11/04', 'fa', 'YYYY/MM/DD').format('YYYY/MM/DD')); // 1989/01/24
+// console.log(moment.from('2018/04/04', 'en', 'YYYY-MM-DD').format());// it would be in jalali system
+// console.log(moment.from('2018-04-04', 'en', 'YYYY-MM-DD').format());// it would be in jalali system
+// console.log(moment.from('1368/11/05', 'fa', 'YYYY/MM/DD').format())
+console.log(new Date().toDateString())
+
+
+console.log('================================')
+m = moment(m.format('YYYY/MM/DD'), 'YYYY/MM/DDD');// parse a gregorian (miladi) date
+console.log(m.locale('fa').format('YYYY/MM/DD')); // 1367/11/04)
+console.log(m.format('jYYYYjMMjDD')); // 13671104)
+console.log(moment('2021/02/04', 'YYYY/MM/DD').locale('fa').format('YYYY/MM/DD'))
+console.log(moment('2021/02/04', 'YYYY/MM/DD').locale('fa').format('YYYYMMDD'))
+console.log(moment(new Date(), 'YYYY/MM/DDD').locale('fa').format('YYYYMMDD'))
+
+
+console.log('***************************')
+console.log(m.format('YYYY/MM/DD'))
+
+m = moment('1989/01/24', 'YYYY/MM/DDD');// parse a gregorian (miladi) date
+console.log(m.format('jYYYY/jMM/jDD')); // 1367/11/04)
+console.log(m.format('jYYYYjMMjDD')); // 13671104)
+
+
+
+
+
 
 // parse jalali date
 // m = moment('1367/11/04', 'jYYYY/jMM/jDD');

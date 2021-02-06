@@ -4,21 +4,37 @@ module.exports = function(sequelize, DataTypes) {
     OrderID: {
       type: DataTypes.BIGINT,
       allowNull: true,
-      //defaultValue: NEXT VALUE FOR [dbo].[Sequence_OrderID],
+      // defaultValue: NEXT VALUE FOR [dbo].[Sequence_OrderID],
       primaryKey: true
+    },
+    OrderType: {
+      type: DataTypes.TINYINT,
+      allowNull: false
+    },
+    WhichOrderID: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+      references: {
+        model: 'Orders',
+        key: 'OrderID'
+      }
     },
     CustomerID_TFOra: {
       type: DataTypes.BIGINT,
-      allowNull: true
+      allowNull: false
     },
     UserID: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: false
     },
     OrderDate: {
       type: DataTypes.DATE,
-      allowNull: true,
+      allowNull: false,
       defaultValue: Sequelize.fn('getdate')
+    },
+    IntOrderDate: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     },
     ShippedDate: {
       type: DataTypes.DATE,
@@ -34,7 +50,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     OrderStatusID: {
       type: DataTypes.TINYINT,
-      allowNull: true,
+      allowNull: false,
       defaultValue: 1,
       references: {
         model: 'OrderStatus',
@@ -43,13 +59,13 @@ module.exports = function(sequelize, DataTypes) {
     },
     OracleRead: {
       type: DataTypes.BOOLEAN,
-      allowNull: true,
+      allowNull: false,
       defaultValue: false
     },
     TrackingCode: {
       type: DataTypes.BIGINT,
       allowNull: true,
-      //defaultValue: NEXT VALUE FOR [dbo].[Sequence_OrderTrackingCode]
+      // defaultValue: NEXT VALUE FOR [dbo].[Sequence_OrderTrackingCode]
     }
   }, {
     sequelize,

@@ -7,6 +7,16 @@ const Insert_Order_ValidationRules = () => {
             .notEmpty(),
         check('ShipAddress')
             .notEmpty(),
+        check('OrderType')
+            .notEmpty(),
+        check('OrderType')
+            .custom((val, {req}) => {
+                if(val === 2 && ! req.body.WhichOrderID){
+                    return Promise.reject('WhichOrderID is required');
+                } else  {
+                    return Promise.resolve('valid');
+                }
+            }),
         // check('ShipCity')
         //     .notEmpty()
         //     .isNumeric(),
@@ -41,6 +51,9 @@ const Insert_Order_ValidationRules = () => {
             .isNumeric()
             .withMessage('مقدار عددی مجاز'),
         check('OrderDetails.*.Tax')
+            .notEmpty()
+            .withMessage('اجباری'),
+        check('OrderDetails.*.Afzoode')
             .notEmpty()
             .withMessage('اجباری')
             .isNumeric()

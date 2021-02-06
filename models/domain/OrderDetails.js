@@ -2,9 +2,9 @@ const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('OrderDetails', {
     OrderDetID: {
-      autoIncrement: true,
       type: DataTypes.BIGINT,
-      allowNull: false,
+      allowNull: true,
+      // defaultValue: NEXT VALUE FOR [dbo].[Sequence_OrderDetID],
       primaryKey: true
     },
     OrderID: {
@@ -68,6 +68,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: Sequelize.fn('getdate')
+    },
+    IntDate: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     }
   }, {
     sequelize,

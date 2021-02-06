@@ -28,6 +28,8 @@ function initModels(sequelize) {
   City.hasMany(Customers, { foreignKey: "CityID"});
   OrderDetails.belongsTo(Orders, { foreignKey: "OrderID"});
   Orders.hasMany(OrderDetails, { foreignKey: "OrderID"});
+  Orders.belongsTo(Orders, { foreignKey: "WhichOrderID"});
+  Orders.hasMany(Orders, { foreignKey: "WhichOrderID"});
   Orders.belongsTo(OrderStatus, { foreignKey: "OrderStatusID"});
   OrderStatus.hasMany(Orders, { foreignKey: "OrderStatusID"});
 
