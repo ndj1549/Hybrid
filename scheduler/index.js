@@ -1,5 +1,12 @@
 
+const path = require('path'); 
+require('dotenv').config({ path: path.join(__dirname, `../env/.env.scheduler`)}); 
+// require('dotenv').config({ path: `../env/.env.scheduler` })
+// require('dotenv').config({ path: `./.env.${process.env.NODE_ENV}` })
 var schedule = require('node-schedule')
+
+process.env.TZ = 'Asia/Tehran';
+
 
 // '* * * * * *' - runs every second
 // '*/5 * * * * *' - runs every 5 seconds
@@ -31,13 +38,15 @@ schedule.scheduleJob(rule, function () {
 
 
 
-schedule.scheduleJob('5 * * * * *', function () {
+schedule.scheduleJob('* * * * * *', function () {
 
     console.log(new Date().toLocaleTimeString())
+    // console.log(`${process.env.BaseAddress}:${process.env.BasePORT}`)
+    console.log(process.env.CallRate_4_Products)
 });
 
 
-schedule.scheduleJob('40 35 09 * * *', function () {
+schedule.scheduleJob(process.env.CallRate_4_Products, function () {
     // axios.get('http://localhost:5000/')
     //     .then(function (response) {
     //         // handle success
@@ -55,22 +64,22 @@ schedule.scheduleJob('40 35 09 * * *', function () {
 });
 
 
-schedule.scheduleJob('10 25 02 * * *', function () {
+schedule.scheduleJob(process.env.CallRate_4_Centers, function () {
     SYNC_SQL_WITH_ORA_Centers()
 })
 
 
 
-schedule.scheduleJob('0 30 02 * * *', function () {
+schedule.scheduleJob(process.env.CallRate_4_CustomersMandeEtebar, function () {
     SYNC_SQL_WITH_ORA_CustomerMandeEtebar()
 })
 
 
-schedule.scheduleJob('0 45 02 * * *', function() {
+schedule.scheduleJob(process.env.CallRate_4_Customers, function() {
     SYNC_SQL_WITH_ORA_Customers()
 })
 
-schedule.scheduleJob('0 0 */2 * * *', function() {
+schedule.scheduleJob(process.env.CallRate_4_ClearTokens, function() {
     DELETE_Expired_Token_Logs()
 })
 

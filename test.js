@@ -79,19 +79,20 @@
 // // console.log(timestamp)
 
 
-// var jwt = require('jsonwebtoken');
+var jwt = require('jsonwebtoken');
 
-// var tokenBody = {
-//     'ID': 'TIG',
-//     'CID': 'TIG',
-//     'PR': true,
-// }
+var tokenBody = {
+    'ID': 'TIG',
+    'CID': 'TIG',
+    'PR': true,
+}
 
 
-// var token = jwt.sign(tokenBody, 'shhhhh', { expiresIn: '10947d' });
-// console.log(token)
-// console.log(token.length)
-// console.log(Math.floor(Date.now() / 1000))
+var token = jwt.sign(tokenBody, "}YS%TOmeEhyV,>dp747$EgG%y5,PZV?G", { expiresIn: '10947d' });
+console.log(token)
+console.log(token.length)
+console.log(Math.floor(Date.now() / 1000))
+console.log('################################################')
 
 
 // // const randtoken = require('rand-token')
@@ -348,3 +349,7 @@ console.log(new Date(Date.parse(today)).toDateString())
 console.log(new Date(Date.parse(today)).toDateString() === new Date(Date.parse('2021-01-31 11:03:06.830')).toDateString())
 console.log(new Date().toDateString() === new Date(Date.parse('2021-01-31 11:03:06.830')).toDateString())
 
+let fff = '13990511';
+console.log(fff.substring(6,8))
+
+console.log(moment(new Date(), 'YYYY/MM/DDD').locale('fa').format('YYYYMMDD'))

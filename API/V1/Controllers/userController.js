@@ -133,6 +133,11 @@ const ChangePassword = async () => {
 }
 
 
+const LockUser = async () => {
+
+}
+
+
 module.exports = {
     sign_in,
     sign_up,
@@ -144,5 +149,6 @@ module.exports = {
     Get_Account_By_UserID,
     Reject_UserToken,
     myProfile,
-    ReNew_Token
+    ReNew_Token,
+    LockUser
 }

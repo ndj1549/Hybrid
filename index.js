@@ -7,10 +7,14 @@ const app = express()
 
 // ----------------------------  Basic Config
 //dotenv package will pick up the .env file and load those settings into Node process
-require('dotenv').config()
+const path = require('path'); 
+require('dotenv').config({ path: path.join(__dirname, `./env/.env`)}); 
+require('dotenv').config({ path: path.join(__dirname, `./env/.env.${process.env.NODE_ENV}`)}); 
+// require('dotenv').config({ path: `./.env` })
+// require('dotenv').config({ path: `./.env.${process.env.NODE_ENV}` })
 const PORT = process.env.PORT || 5000;
 // 3 NODE_ENV in this project: production=>publish Internet, server61=> publish on server 87.61
-const NODE_ENV = process.env.NODE_ENV || 'development';
+// const NODE_ENV = process.env.NODE_ENV || 'dev';
 
 
 //----------------------------- Middlewares
@@ -35,7 +39,11 @@ app.use('/api', require('./API'));
 app.get('/', (req, res) => {
     // throw new Error('woops');
     console.log('called / : at ' + new Date().toString())
-    res.status(200).send('OK' + new Date().toString());
+    console.log(process.env.NODE_ENV)
+    res.status(200).json({
+        "NODE_ENV": process.env.NODE_ENV,
+        "PORT": process.env.PORT
+    });
 })
 
 

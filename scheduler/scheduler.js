@@ -13,7 +13,7 @@ const dbConfig = {
 };
 
 
-const BASE_ADDRESS = 'http://localhost:5000/api/v1';
+const BASE_ADDRESS = `http://${process.env.BaseAddress}:${process.env.BasePORT}/api/v1`;
 
 
 const DB = require('../models/domain/init-models')(sequelize)
@@ -78,7 +78,7 @@ const SYNC_SQL_WITH_ORA_Centers = async () => {
             url: `${BASE_ADDRESS}/centers/bulk`,
             data: newList,
             timeout: 500000, // 5 minutes
-            //headers: { 'X-Custom-Header': 'foobar' }
+            headers: { 'x-auth-token': config.get('ACCESS_TOKEN_TIG') }
         });
 
         if (result.status == 200) {
@@ -143,7 +143,7 @@ const SYNC_SQL_WITH_ORA_Customers = async () => {
             url: `${BASE_ADDRESS}/customers/bulk`,
             data: newList,
             timeout: 500000, // 5 minutes
-            //headers: { 'X-Custom-Header': 'foobar' }
+            headers: { 'x-auth-token': config.get('ACCESS_TOKEN_TIG') }
         });
 
         if (result.status == 200) {
@@ -207,7 +207,7 @@ const SYNC_SQL_WITH_ORA_CustomerMandeEtebar = async () => {
             url: `${BASE_ADDRESS}/customers/bulk`,
             data: newList,
             timeout: 500000, // 5 minutes
-            //headers: { 'X-Custom-Header': 'foobar' }
+            headers: { 'x-auth-token': config.get('ACCESS_TOKEN_TIG') }
         });
 
         if (result.status == 200) {
@@ -292,7 +292,7 @@ const SYNC_SQL_WITH_ORA_Products = async () => {
             url: `${BASE_ADDRESS}/products/bulk`,
             data: list.rows,
             timeout: 500000, // 5 minutes
-            //headers: { 'X-Custom-Header': 'foobar' }
+            headers: { 'x-auth-token': config.get('ACCESS_TOKEN_TIG') }
         });
 
         if (result.status == 200) {
