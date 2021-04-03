@@ -30,12 +30,11 @@ const Save_Order_On_Insert = async (req, res, next) => {
 
 
     try {
-        //console.log(req.body)
+        
         // run validation
         // return 400 if not validated        
         tran1 = await sequelize.transaction();
-
-        // let order_header = _.pick(req.body, ['CustomerID_TFOra', 'UserID', 'ShippedDate', 'ShipCity', 'ShipAddress', 'OrderStatusID', 'OracleRead'])
+        
         let order_header = _.pick(req.body, ['OrderType', 'WhichOrderID', 'CustomerID_TFOra', 'ShippedDate', 'ShipCity', 'ShipAddress'])
 
         //order_header['TrackingCode'] = TrackingCode.generate()
@@ -46,11 +45,10 @@ const Save_Order_On_Insert = async (req, res, next) => {
         order_header['UserID'] = req.user.ID;
         order_header['IntOrderDate'] = Number(moment(new Date(), 'YYYY/MM/DDD').locale('fa').format('YYYYMMDD'))
         const newOrder = await DB.Orders.create(order_header, { transaction: tran1 });
-        //console.log(newOrder.dataValues)
+        
         var list = []
         req.body.OrderDetails.forEach(rec => {
-            rec = { ...rec, OrderID: Number(newOrder.dataValues.OrderID), IntDate: order_header['IntOrderDate'] }
-            //rec['OrderID'] = newOrder.dataValues.OrderID
+            rec = { ...rec, OrderID: Number(newOrder.dataValues.OrderID), IntDate: order_header['IntOrderDate'] }            
             list.push(rec)
         })
 
@@ -141,32 +139,11 @@ const List_Orders_From_To = async (req, res, next) => {
         res.status(400).send('From date is neccessary')
     }
 
-    // console.log(req.params.FROM)
-    // console.log(req.params.TO)
-    // convert dates from persian to gregorian
-    // const m = moment();
-    // const _from = moment.from(req.params.FROM, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD')
-    // var _to = 0;
-    // if (!req.params.TO) {
-    //     console.log("you didn't provide TO date; we set it to today by default")
-    //     _to = m.format('YYYY-MM-DD') // gregorian date
-    // } else {
-    //     _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
-    // }
-
-    // // console.log({ "from": _from, "to": _to })
-    // const startDate = new Date(_from.toString());
-    // const endDate = new Date(_to.toString());
 
     const startDate = Number(req.params.FROM.replace(/-/g, ""))
     const endDate = (!req.params.TO) ? startDate : Number(req.params.TO.replace(/-/g, ""))
 
-
-
-
-
-    try {
-        // const { Orders, OrderDetails } = require('../../../models/domain/init-models')(sequelize, DataTypes)
+    try {        
         const result = await DB.Orders.findAll({
             where: {
                 IntOrderDate: {
@@ -191,25 +168,6 @@ const List_Orders_From_To = async (req, res, next) => {
 
 const List_MyOrders_From_To = async (req, res, next) => {
 
-    // if (!req.params.FROM) {
-    //     res.status(400).send('From date is neccessary')        
-    // }
-
-
-    // const m = moment();
-    // const _from = moment.from(req.params.FROM, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD')
-    // var _to = 0;
-    // if (!req.params.TO) {
-    //     console.log("you didn't provide TO date; we set it to today by default")
-    //     _to = m.format('YYYY-MM-DD') // gregorian date
-    // } else {
-    //     _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
-    // }
-
-    // // console.log({ "from": _from, "to": _to })
-
-    // const startDate = new Date(_from.toString());
-    // const endDate = new Date(_to.toString());
     var startDate = 0;
     if(!req.params.FROM){
         startDate = moment(new Date(), 'YYYY/MM/DDD').locale('fa').format('YYYYMMDD')
@@ -459,20 +417,7 @@ const Delete_Order = async (req, res, next) => {
             throw new MyErrorHandler(404, 'Order Not Found')
         }
 
-        // console.log(_order)
 
-        // await DB.Orders.destroy({
-        //     where: {
-        //         OrderID: req.params.orderID
-        //     },
-        //     transaction: tran1
-        // })
-        // await DB.Orders.update({ OrderStatusID: 3 }, { // ابطال
-        //     where: {
-        //         OrderID: _order.OrderID
-        //     },
-        //     transaction: tran1
-        // })
 
         // update mojudi anbar              
         const operationSucceeded = await COMPENSATE_PRODUCT_MOJUDI(_order.OrderID, req.user.CID, tran1, OP.PLUS)
@@ -603,8 +548,7 @@ const Get_Details_Of_OrderID = async (req, res, next) => {
 
 const List_Details_Of_Orders_Today = async (req, res, next) => {
     const m = moment();
-    const currentDate = m.format('YYYY-MM-DD')
-    // console.log(currentDate)
+    const currentDate = m.format('YYYY-MM-DD')    
 
     try {
 
@@ -633,21 +577,6 @@ const List_Details_Of_Orders_FROM_TO = async (req, res, next) => {
     if (!req.params.FROM) {
         res.status(400).send('From date is neccessary')
     }
-
-    // console.log(req.params.FROM)
-    // console.log(req.params.TO)
-    // convert dates from persian to gregorian
-    // const m = moment();
-    // const _from = moment.from(req.params.FROM, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD') // 
-    // var _to = 0;
-    // if (!req.params.TO) {
-    //     console.log("you didn't provide TO date; we set it to today by default")
-    //     _to = m.format('YYYY-MM-DD') // gregorian date
-    // } else {
-    //     _to = moment.from(req.params.TO, 'fa', 'YYYY-MM-DD').format('YYYY-MM-DD')
-    // }
-
-    // console.log({ "from": _from, "to": _to })
 
 
     const startDate = Number(req.params.FROM.replace(/-/g, ""))

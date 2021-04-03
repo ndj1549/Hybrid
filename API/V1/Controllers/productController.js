@@ -220,24 +220,6 @@ const Set_Mojudi_Kala = async (req, res, next) => {
 
 
 
-// const Simple_Select_EagerLoad = async (req, res, next) => {
-//   try {
-//     const productRepo = require('../../../models/domain/Product_Repository')(sequelize, DataTypes)
-//     const ProductImage = require('../../../models/domain/ProductImage')(sequelize, DataTypes)
-
-//     const allProducts = await productRepo.findAll({
-//       include: {
-//         model: ProductImage,
-//       }
-//     });
-//     res.status(200).send(allProducts)
-//   } catch (err) {
-//     next(err)
-//   }
-// }
-
-
-
 
 
 module.exports = {
